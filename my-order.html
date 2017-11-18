@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <title>我的订单</title>
+    <link rel="stylesheet" href="css/zy-style.css">
+    <link rel="stylesheet" type="text/css" href="css/htmleaf-demo.css">
+    <link rel="stylesheet" href="css/dropload.css">
+</head>
+<body class="bg-color-gr">
+<section class="order-past top-zero">
+    <label>历史订单</label>
+    <div id="orderContent">
+        <ul id="pastOrder">
+        </ul>
+    </div>
+</section>
+</body>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script src="js/layer/layer.js"></script>
+<script src="js/ajax.js?2019"></script>
+<script src="js/dropload.min.js"></script>
+<script>
+    (function(){
+        var orderObj = {
+            init: function () {
+                orderObj.getOrderData();
+
+            },
+            getOrderData: function () {//滚动加载数据
+                // 页数
+                var page = 0;
+                $('#orderContent').dropload({
+                    scrollArea: window,
+                    loadDownFn: function (me) {
+                        console.log("test");
+                        page++;
+                        var html = "";
+                        $.ajax({
+                            url: window.host + "/wechat/charge/order/list",
+                            type: 'POST',
+                            data: {page: page, token: localStorage.token},
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.code == 201) {
+                                    layer.msg("Created");
+                                } else if (data.code == 401) {
+                                    layer.msg("Unauthorized");
+                                } else if (data.code == 403) {
+                                    layer.msg("Unauthorized");
+                                } else if (data.code == 404) {//过期
+                                    layer.msg("Not Found");
+                                }  else if(data.code == 20007||data.code == 80000) {
+                                    localStorage.current_url = window.location.href;
+                                    window.location.href = "login.html";
+                                }else {
+                                    if (data.code == 200) {//成功
+                                        var d = data["data"];
+                                        if (d.length > 0) {
+                                            for (var i = 0, len = d.length; i < len; i++) {
+//                                                if (i == 0 && page == 1) {//第一页的第一项项数据
+//                                                    var orderStatus=d[0]["orderStatus"];
+//                                                    if(orderStatus==3){
+//                                                        window.location.href = "order-detail.html";
+//                                                        return false;
+//                                                    }
+//                                                }
+//                                                var endTime = d[i]["planEndTime"] ? $.getTimeDetail(d[i]["planEndTime"], 4) : "未知";
+                                                var endTime = $.getTimeStr(d[i]["updatetime"]);
+                                                html += '<li><label>订单完成时间：<span>'
+                                                        + endTime
+                                                        + '</span></label><label>消耗能量球：<span>'
+                                                        + d[i]["amount"] + '</span>个</label>' +
+                                                    '<label>状态：<span>'
+                                                    + $.getOrderStatus(d[i]["orderStatus"]) + '</span></label></li>';
+                                            }
+                                        } else {
+                                            // 锁定
+                                            me.lock();
+                                            // 无数据
+                                            me.noData();
+                                        }
+                                        // 为了测试，延迟1秒加载
+                                        setTimeout(function () {
+                                            // 插入数据到页面，放到最后面
+                                            $("#pastOrder").append(html);
+                                            // 每次数据插入，必须重置
+                                            me.resetload();
+                                        }, 1000);
+                                    } else {
+                                        layer.msg(data["message"]);
+                                    }
+                                }
+                            },
+                            error: function () {
+                                // 即使加载出错，也得重置
+                                me.resetload();
+                                layer.msg('获取数据失败请稍后再试！');
+                            }
+                        });
+                    }
+                });
+            }
+        };
+        $(orderObj.init);
+    })();
+
+</script>
+</html>

@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0, minimum-scale=1, maximum-scale=1" />
+    <link rel="stylesheet" href="css/map.css" type="text/css">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>充电桩定位</title>
+</head>
+
+<body>
+    <div id="page">
+        <!-- 地图容器 -->
+        <div id="container" class="map" tabindex="0"></div>
+        <!--&lt;!&ndash; 搜索框&ndash;&gt;-->
+        <!--<div id="searchBox">-->
+        <!--<input id="tipinput" type="input" placeholder="搜索网点" />-->
+        <!--<div id="clearSearchBtn">-->
+        <!--<div class="del">&#10005;</div>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!-- 结果面板 -->
+        <div id="panel" class="hidden">
+            <!-- 隐藏按钮 -->
+            <a id="showHideBtn" href="javascript:void(0);"></a>
+            <div id="emptyTip">没有内容！</div>
+            <!--搜索结果列表 -->
+            <div id="poiList">
+            </div>
+        </div>
+        <!-- loading -->
+        <div id="loader"></div>
+    </div>
+    <div id="fixed_mark">
+        <div class="shcontrul">
+            <div class="back_mark">
+                <img src="images/warn.png" alt="">
+            </div>
+        </div>
+        <div class="shcontrul hidden">
+            <div class="back_mark">
+                <img src="images/swar.png" alt="">
+            </div>
+            <div class="font_mark">
+                <p>您有 <span>1</span> 个新订单未处理</p>
+            </div>
+        </div>
+    </div>
+    <aside class="code">
+        <a href="javascript:;" id="scanCharge"><img src="images/code.png" alt=""></a>
+        <a href="javascript:;" id="unscanCharge"><img src="images/code_limit.png" alt=""></a>
+        <!--<label id="pos-pile"></label>-->
+    </aside>
+    <a href="javascript:void(0);" id="mapBack"><img src="images/gps.png" width="30" height="30"></a>
+    <!--引入jsapi -->
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/layer/layer.js"></script>
+    <script src="js/ajax.js"></script>
+    <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="js/wechat.js"></script>
+    <script type="text/javascript" src='http://webapi.amap.com/maps?v=1.3&test=true&key=bfe31f4e0fb231d29e1d3ce951e2c780&plugin=AMap.ToolBar,AMap.MarkerClusterer,AMap.Geolocation'></script>
+    <!--<script type="text/javascript" src='http://webapi.amap.com/maps?v=1.3&test=true&plugin=AMap.ToolBar&key=bfe31f4e0fb231d29e1d3ce951e2c780'></script>-->
+    <!--缩放按钮 -->
+    <script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
+    <!--Just Zepto -->
+    <!--<script type='text/javascript' src='http://g.alicdn.com/sj/lib/zepto/zepto.min.js'></script>-->
+    <script>
+    $(function() {
+        $.ajaxByPost("/wechat/charge/order/list", {
+            page: 1,
+            token: 'a072db084cffb8fb3e730c0d8f7f011e' //localStorage.token
+        }, function(data) {
+            if (data.code == 200) {
+                var d = data["data"];
+                if (d.length > 0) {
+                    var orderStatus = d[0]["orderStatus"];
+                    var orderSeq = d[0]["orderSeq"];
+                    if (orderStatus !== 2) {
+                        $('#unscanCharge').show();
+                        $('#fixed_mark').show();
+                    } else {
+                        $('#scanCharge').show();
+                    }
+                }
+            }
+        })
+        $('#fixed_mark .shcontrul').click(function() {
+            $('#fixed_mark .shcontrul').slideToggle();
+        })
+        $('#unscanCharge').click(function() {
+            $('#fixed_mark .shcontrul').slideToggle();
+        })
+    })
+    </script>
+    <script>
+    //创建地图
+    var map = new AMap.Map('container', {
+        resizeEnable: true,
+        zoom: 16
+    });
+    (function() {
+        var mapObj = {
+            invitedCode: "",
+            init: function() {
+                mapObj.mapBack();
+                mapObj.geoLocation();
+            },
+            position: ["121.170006", "31.291020"],
+            geoLocation: function() {
+                map.plugin(["AMap.Geolocation"], function() { //添加浏览器定位服务插件
+                    var geolocation = new AMap.Geolocation({
+                        enableHighAccuracy: true, //是否使用高精度定位，默认:true
+                        timeout: 5000, //超过5秒后停止定位，默认：无穷大
+                        maximumAge: 0, //定位结果缓存0毫秒，默认：0
+                        convert: true, //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
+                        showButton: false, //显示定位按钮，默认：true
+                        showMarker: true, //定位成功后在定位到的位置显示点标记，默认：true
+                        panToLocation: true, //定位成功后将定位到的位置作为地图中心点，默认：true
+                        zoomToAccuracy: true //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+                    });
+                    map.addControl(geolocation);
+                    geolocation.getCurrentPosition();
+                    AMap.event.addListener(geolocation, 'complete', function(data) {
+                        var position = data.position;
+                        mapObj.position = [position.getLng(), position.getLat()];
+                        mapObj.setMapCenter(mapObj.position);
+                        //                            console.log(position);
+                        mapObj.getChargeInfo();
+                    }); //返回定位信息
+                    AMap.event.addListener(geolocation, 'error', function(error) {
+                        //                            layer.msg("定位失败");
+                        layer.msg(error.message);
+                    }); //返回定位出错信息
+                });
+            },
+            getChargeInfo: function() { //获取周边充电宝
+                $.ajaxByPost("/wechat/charge/station/listPosition", {
+                    longitude: mapObj.position[0],
+                    latitude: mapObj.position[1]
+                }, function(data) {
+                    if (data.code == 200) { //成功
+                        console.log(data);
+                        var d = data["data"],
+                            markers = [];
+                        for (var i = 0, len = d.length; i < len; i++) {
+                            var marker = mapObj.addMarker(d[i]);
+                            markers.push(marker);
+                            // 设置label标签
+                            marker.setLabel({ //label默认蓝框白底左上角显示，样式className为：amap-marker-label
+                                offset: new AMap.Pixel(-10, -15), //修改label相对于maker的位置
+                                content: d[i]["strStationName"]
+                            });
+                            map.setFitView(); //使地图自适应显示到合适的范围
+                            marker.on('click', function(e) {
+                                var _marker = e.target;
+                                var data = _marker.G.extData;
+                                mapObj.getStakeInfo(data);
+                            });
+                        }
+                    } else {
+                        layer.msg(data["message"]);
+                    }
+                    //                        //点聚合
+                    //                        var count  = d.length;
+                    //                        var _renderCluserMarker = function (context) {
+                    //                            var factor = Math.pow(context.count/count,1/18);
+                    //                            var div = document.createElement('div');
+                    //                            var Hue = 180 - factor* 180;
+                    //                            var bgColor = 'hsla('+Hue+',100%,50%,0.7)';
+                    //                            var fontColor = 'hsla('+Hue+',100%,20%,1)';
+                    //                            var borderColor = 'hsla('+Hue+',100%,40%,1)';
+                    //                            var shadowColor = 'hsla('+Hue+',100%,50%,1)';
+                    //                            div.style.backgroundColor = bgColor;
+                    //                            var size = Math.round(30 + Math.pow(context.count/count,1/5) * 20);
+                    //                            div.style.width = div.style.height = size+'px';
+                    //                            div.style.border = 'solid 1px '+ borderColor;
+                    //                            div.style.borderRadius = size/2 + 'px';
+                    //                            div.style.boxShadow = '0 0 1px '+ shadowColor;
+                    //                            div.innerHTML = context.count;
+                    //                            div.style.lineHeight = size+'px';
+                    //                            div.style.color = fontColor;
+                    //                            div.style.fontSize = '14px';
+                    //                            div.style.textAlign = 'center';
+                    //                            context.marker.setOffset(new AMap.Pixel(-size/2,-size/2));
+                    //                            context.marker.setContent(div);
+                    //                        };
+                    //                        var cluster;
+                    //                        addCluster(2);
+                    //                        function addCluster(tag) {
+                    //                            if (cluster) {
+                    //                                cluster.setMap(null);
+                    //                            }
+                    //                            if (tag == 2) {//完全自定义
+                    //                                cluster = new AMap.MarkerClusterer(map,markers,{
+                    //                                    gridSize:80,
+                    //                                    renderCluserMarker:_renderCluserMarker
+                    //                                });
+                    //                            }else {//默认样式
+                    //                                cluster = new AMap.MarkerClusterer(map, markers,{gridSize:80});
+                    //                            }
+                    //                        }
+                });
+            },
+            addMarker: function(data) {
+                var position = [data["longitude"], data["latitude"]];
+                //添加点标记，并使用自己的icon
+                return new AMap.Marker({
+                    map: map, //创建时直接赋予map属性
+                    position: position,
+                    icon: new AMap.Icon({
+                        size: new AMap.Size(25, 25), //图标大小
+                        image: "images/point.png",
+                        imageOffset: new AMap.Pixel(0, 0)
+                    }),
+                    extData: { stationSeq: data["stationSeq"], add: data["strStationAddress"] }
+                });
+            },
+            mapBack: function() {
+                $("#mapBack").on("click", function() {
+                    mapObj.setMapCenter(mapObj.position);
+                });
+            },
+            setMapCenter: function(position) { //设置地图的中心点
+                // 设置缩放级别和中心点
+                map.setZoomAndCenter(16, position);
+                // 在新中心点添加 marker
+                var marker = new AMap.Marker({
+                    map: map,
+                    position: position
+                });
+            },
+            getStakeInfo: function(d) { //展现某个电站的充电桩统计数据
+                $.ajaxByPost("/wechat/charge/stake/info", {
+                    stationSeq: d["stationSeq"]
+                }, function(data) {
+                    if (data.code == 200) { //成功
+                        var html = "";
+                        data = data["data"];
+                        for (var i = 0, len = data.length; i < len; i++) {
+                            var txt = "",
+                                color = "";
+                            switch (data[i]["chargeStatus"]) { //1离线，2故障，3待机 ，4工作 ，5充电完成 ,6 保修
+                                case 1:
+                                    txt = "离线";
+                                    color = "cl-gray";
+                                    break;
+                                case 2:
+                                    txt = "故障";
+                                    color = "cl-gray";
+                                    break;
+                                case 3:
+                                    txt = "待机";
+                                    color = "cl-green";
+                                    break;
+                                case 4:
+                                    txt = "工作";
+                                    color = "cl-yellow";
+                                    break;
+                                case 5:
+                                    txt = "充电完成";
+                                    color = "cl-green";
+                                    break;
+                                case 6:
+                                    txt = "保修";
+                                    color = "cl-gray";
+                                    break;
+                            }
+                            if (i == 0) {
+                                html += '<aside class="pile-info"> <div> <img src="images/map1.png" alt=""> <label>' + d["add"] + '</label> </div><ul>';
+                            }
+                            html += '<li><img src="images/map2.png" alt=""><label>' + data[i]["strStakeNO"] + '号充电桩</label><span class="' + color + '">' + txt + '</span></li>';
+                            if (i == len - 1) {
+                                html += '</ul></aside>';
+                            }
+                        }
+                        html = html == "" ? "暂无充电桩" : html;
+                        mapObj.layerStake(html);
+                    } else {
+                        layer.msg(data["message"]);
+                    }
+                });
+            },
+            layerStake: function(content) { //弹出信息
+                layer.open({
+                    title: [
+                        '提交申请中',
+                        'background-color: #fff; color:#000;'
+                    ],
+                    btn: '',
+                    content: content
+                });
+            },
+            scanCharge: function() { //扫码充电
+                //                    $("img","#scanCharge").on("click",function(){
+                //
+                //                    });
+            },
+            checkPoiList: function() { //检查结果列表是否为空， 为空时显示必要的提示，即#emptyTip
+                $('#panel').toggleClass('empty', !($.trim($('#poiList').html())));
+            },
+            searchMap: function() {
+                //搜索框支持自动完成提示
+                var auto = new AMap.Autocomplete({
+                    input: "tipinput"
+                });
+                //构造地点查询类
+                var placeSearch = new AMap.PlaceSearch({
+                    pageSize: 5,
+                    pageIndex: 1,
+                    map: map,
+                    panel: "poiList"
+                });
+                //监听搜索框的提示选中事件
+                AMap.event.addListener(auto, "select", function(e) {
+
+                    //设置搜索的城市
+                    placeSearch.setCity(e.poi.adcode);
+                    //开始搜索对应的poi名称
+                    placeSearch.search(e.poi.name, function(status, results) {
+
+                        if (results.pois && results.pois.length > 0) {
+                            $('#panel').toggleClass('empty');
+                        }
+
+                        //显示结果列表
+                        $('#panel').removeClass('hidden');
+
+                        //隐藏loading状态
+                        $(document.body).removeClass('searching');
+                    });
+                    //显示loading状态
+                    $(document.body).addClass('searching');
+                });
+                mapObj.checkPoiList();
+                //监听搜索列表的渲染完成事件
+                AMap.event.addListener(mapObj.placeSearch, 'renderComplete', function() {
+                    checkPoiList();
+                });
+                //监听marker/列表的选中事件
+                AMap.event.addListener(mapObj.placeSearch, 'selectChanged', function(results) {
+                    //获取当前选中的结果数据
+                    console.log(results.selected.data);
+                });
+                $('#showHideBtn').click(function() {
+                    $('#panel').toggleClass('hidden');
+                });
+
+                $('#clearSearchBtn').click(function() {
+
+                    //清除搜索框内容
+                    $('#tipinput').val('');
+
+                    //清除结果列表
+                    placeSearch.clear();
+                    $('#panel').addClass('hidden');
+                    mapObj.checkPoiList();
+                });
+            }
+        };
+        $(mapObj.init);
+    })();
+    </script>
+</body>
+
+</html>

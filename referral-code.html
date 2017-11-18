@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <title>推荐码</title>
+    <link rel="stylesheet" href="css/zy-style.css">
+</head>
+<body>
+<section class="referral">
+    <div>
+        <img src="images/ref1.jpg" alt="">
+        <label>推荐码
+            <h1 id="scanCode">2017AD12</h1>
+        </label>
+
+    </div>
+    <img src="images/ewm.jpg" alt="">
+    <a class="login-btn">分享</a>
+</section>
+</body>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script src="js/layer/layer.js"></script>
+<script src="js/ajax.js"></script>
+<script>
+    (function(){
+        var referCodeObj = {
+            invitedCode:"",
+            init: function(){
+                referCodeObj.showInfo();
+            },
+            showInfo: function(){
+                console.log($.getUrlArgs());
+                $("#scanCode").html($.getUrlArgs().inviteCode);
+            }
+        };
+        $(referCodeObj.init);
+    })();
+</script>
+</html>

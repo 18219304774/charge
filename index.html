@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <title>扫描充电</title>
+    <link rel="stylesheet" href="css/zy-style.css">
+    <link rel="stylesheet" type="text/css" href="css/htmleaf-demo.css">
+    <link rel="stylesheet" href="css/dropload.css">
+</head>
+<body class="bg-color-gr">
+<section class="order-past top-zero">
+    <label>电桩编码</label>
+    <span id="code">getUrlPars()['code']</span>
+</section>
+</body>
+
+<script src="js/jquery-3.2.1.min.js"></script>
+<script src="js/layer/layer.js"></script>
+<script src="js/ajax.js?2019"></script>
+<script src="js/dropload.min.js"></script>
+<script>
+
+function getUrlPars(){   　　　　　　　　//方法2(获取url所有参数与值转化为对象，然后后面传参获取指定的参数值)
+    var url = location.search;
+    var theRequest = new Object();
+    if(url.indexOf("?")!=-1){
+       var str = url.substr(1);
+       strs = str.split("&");
+       for(var i=0;i<strs.length;i++)
+        {
+          var sTemp = strs[i].split("=");
+          theRequest[sTemp[0]]=(sTemp[1]);
+        }
+    }
+    return theRequest;
+}
+
+$(function(){ 
+alert(getUrlPars()['code']);
+}); 
+
+
+</script>
+</html>

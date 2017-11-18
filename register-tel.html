@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <title>手机注册</title>
+    <link rel="stylesheet" href="css/zy-style.css">
+</head>
+<body class="">
+<header class="register-head">
+    <img src="images/iphone.png" alt="">
+    <label>手机用户注册</label>
+</header>
+<section class="build-list mg-t-5">
+    <ul id="registerForm">
+        <li>
+            <input type="text" id="tel" value="" placeholder="请输入手机号">
+        </li>
+        <li class="register-code">
+            <input type="text" value="" id="verifyCode" placeholder="请输入6位验证码">
+            <a href="javascript:;" class="verify-code">获取验证码</a>
+        </li>
+        <li>
+            <input type="password" id="userPwd" value="" placeholder="密码设置">
+        </li>
+        <li>
+            <input type="password" id="confirmPwd" value="" placeholder="确认密码">
+        </li>
+        <li>
+            <input type="text" id="invitedCode" placeholder="请输入推荐码（选填）">
+        </li>
+    </ul>
+    <a href="javascript:;" class="login-btn" id="register">一键注册</a>
+</section>
+<a class=" txt-c pos-botm w-100" href="agreement.html">查看服务协议</a>
+</body>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/ajax.js"></script>
+<script>
+    (function(){
+        var registerObj = {
+            init: function(){
+                registerObj.verify();
+                registerObj.register();
+            },
+            verify: function(){
+                $(".verify-code").on("click",function(){
+                    var $verifyBtn = $(this);
+                    var seconds = 60;
+                    var telIsRight = registerObj.validate($("#tel"));
+                    if($verifyBtn.hasClass("inactive")||!telIsRight){
+                        return;
+                    }
+                    $.ajaxByPost("/wechat/user/sms/verify",{
+                        mobilePhone:$("#tel").valTrim()
+                    },function(data){
+                        if (data.code == 200) {//成功
+                            $verifyBtn.addClass("inactive").html(seconds+"秒");
+                            var interval = setInterval(function(){
+                                $verifyBtn.html(seconds+"秒");
+                                if(seconds == 1){
+                                    clearInterval(interval);
+                                    $verifyBtn.removeClass("inactive").html("获取验证码");
+                                }
+                                seconds--;
+                            },1000);
+                            console.log(data);
+                        }else{
+                            layer.msg(data["message"]);
+                        }
+                    });
+                });
+            },
+            validate: function(ele){
+                var msg = "";
+                var value = ele.valTrim(),
+                        id = ele.attr('id');
+                switch (id) {
+                    case 'tel':
+                        if (value === "") {
+                            msg = "请输入手机号";
+                        }
+                        break;
+                    case 'userPwd':
+                        if (value === "") {
+                            msg = "请输入密码";
+                        }
+                        break;
+                    case 'confirmPwd':
+                        if (value === "") {
+                            msg = "请输入确认密码";
+                        }else if($("#userPwd").valTrim()!=value){
+                            msg = "两次密码输入不一致";
+                        }
+                        break;
+                    case 'verifyCode':
+                        if (value === "") {
+                            msg = "请输入6位验证码";
+                        }
+                        break;
+                }
+//                console.log(msg);
+                if (msg != "") {//校验失败
+                    layer.msg(msg);
+                    ele.addClass('border-error');
+                    return false;
+                } else {
+                    ele.removeClass('border-error');
+                }
+                return true;
+            },
+            register: function(){
+                $("#register").on("click",function(){
+                    var isValidate = true;
+                    $("input","#registerForm").each(function(){
+                        var $input = $(this);
+                        isValidate = registerObj.validate($input);
+                        return isValidate;
+                    });
+                    if(isValidate){
+                        $.ajaxByPost("/wechat/user/regist",{
+                            mobilePhone:$("#tel").valTrim(),
+                            password:$("#userPwd").valTrim(),
+                            verifyCode:$("#verifyCode").valTrim(),
+                            invitedCode:$("#invitedCode").valTrim()
+                        },function(data){
+                            if (data.code == 200) {//成功
+                                window.location.href = "register-success.html";
+                                console.log(data);
+                            }else{
+                                layer.msg(data["message"]);
+                            }
+                        });
+                    }
+                });
+            }
+        };
+        $(registerObj.init);
+    })();
+</script>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <title>充电桩详情-充电中</title>
+    <link rel="stylesheet" href="css/zy-style.css">
+</head>
+<body>
+<label class="charging-tip ">支付</label>
+<aside class="charge new-btn ">
+    <img src="images/5.png" id="charge">
+    <p id="chargeTip" class="">
+        已充电量
+        <br><span id="chargeTotal">999</span>
+        <span>度</span>
+    </p>
+    <label>完成充电时间：<span id="costTime">12:21:14</span></label>
+</aside>
+<div class="new-btn mg-t-4">
+    <a href="javascript:void(0);" class="login-btn w-8" id="confirmPay">确认支付：<span id="amountHas">999</span>颗能量球</a>
+</div>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script src="js/layer/layer.js"></script>
+<script src="js/ajax.js?2019"></script>
+<script>
+    (function(){
+        var payObj = {
+            orderId:"",
+            amount:"",
+            init: function () {
+                payObj.getFirstPage();
+                payObj.confirmPay();
+            },
+            getFirstPage: function () {
+                $.ajaxByPost("/wechat/charge/order/list", {
+                    page: 1,
+                    token: localStorage.token
+                }, function (data) {
+                    if (data.code == 200) {//成功
+                        var d = data["data"];
+                        if (d.length > 0) {
+                            var amount = d[0]["amount"];
+                            payObj.orderId = d[0]["orderId"];
+                            payObj.amount = d[0]["amount"];
+                            $("#chargeTotal").html(((d[0]["chargeTotal"])/1000).toFixed(2));
+                            $("#costTime").html($.getSfm(d[0]["costTime"]));
+                            $("#amountHas").html(amount);
+                        }
+                    } else {
+                        layer.msg(data["message"]);
+                    }
+                });
+            },
+            confirmPay: function(){//确认支付
+                $("#confirmPay").on("click",function(){
+                    $.ajaxByPost("/wechat/charge/wallet/innerPay", {
+                        orderId: payObj.orderId,
+                        amount:payObj.amount,
+                        token: localStorage.token
+                    }, function (data) {
+                        if (data.code == 200) {//成功
+                            //跳转到支付成功页面
+                            window.location.href="pay-success.html";
+                        } else {
+                            layer.msg(data["message"]);
+                        }
+                    }, true);
+                });
+            }
+        };
+        $(payObj.init);
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <title>邀请好友</title>
+    <link rel="stylesheet" href="css/zy-style.css">
+</head>
+<body >
+    <aside class="friends">
+        <section>
+            <label>引荐码：<span id="inviteCode"></span></label>
+        </section>
+
+        <img src="images/friend1.jpg">
+        <div>
+            <a href ="javascript:return false;"class="login-btn" id="back-to-top">邀请好友</a>
+        </div>
+    </aside>
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/layer/layer.js"></script>
+	<script src="js/ajax.js"></script>
+    <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="js/wechat.js"></script>
+    <script>
+        (function(){
+            var applyObj = {
+                init: function(){
+                    applyObj.getInfo();
+                },
+                getInfo: function(){
+                    $.ajaxByGet("/wechat/user/user/info",{
+                        token:localStorage.token
+                    },function(data){
+                        if (data.code == 200) {//成功
+                            var d = data["data"];
+                            $("#inviteCode").html(d["inviteCode"]);
+                        }else{
+                            layer.msg(data["message"]);
+                        }
+                    });
+                }
+            };
+            $(applyObj.init);
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <title>登录</title>
+    <link rel="stylesheet" href="js/swiper.min.css">
+    <link rel="stylesheet" href="css/zy-style.css">
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/swiper.3.4.2.min.js"></script>
+    <script src="js/tab-control.js"></script>
+</head>
+<body>
+    <!--<header class="header">-->
+        <!--<img class="head-bg" src="images/head-bg.jpg" alt="">-->
+        <!--<img class="head-name" src="images/name.png">-->
+    <!--</header>-->
+    <section>
+        <div class="swiper-container zy-slide">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide"><img src="images/scr1.jpg" alt=""></div>
+                <div class="swiper-slide">Slide 2</div>
+                <div class="swiper-slide">Slide 3</div>
+            </div>
+            <!-- 如果需要分页器 -->
+            <div class="swiper-pagination"></div>
+            <!-- 如果需要导航按钮 -->
+            <!--<div class="swiper-button-prev"></div>-->
+            <!--<div class="swiper-button-next"></div>-->
+            <!-- 如果需要滚动条 -->
+            <!--<div class="swiper-scrollbar"></div>-->
+        </div>
+    </section>
+    <section class="fill-info">
+        <ul class="tab-title clear-fix" id="tabs-head">
+            <li class="" data-type="0"><img src="images/iphone.png" alt=""><span>手机登录</span></li>
+            <li data-type="0"><img src="images/evcard.png" alt=""><span>EVCARD用户</span></li>
+        </ul>
+        <ul class="login-mess" id="tab_conbox">
+            <li class=" login-info" id="telForm">
+                <div class="login-phone">
+                    <input type="text" id="telNum" placeholder="请输入手机号" autocomplete="off">
+                </div>
+                <div class="login-pwd">
+                    <input type="password" id="telPwd" placeholder="请输入密码" autocomplete="off">
+                </div>
+                <!--<a class="forget-pwd" href="foget.html">忘记密码？</a>-->
+                <a  href="javascript:void(0);" class="login-btn" id="telLogin">登  录</a>
+                <a href="register-tel.html" class="register-btn">新用户注册</a>
+                <!--<a class="forget-pwd txt-c pos-botm w-100" href="javascript:void(0);">查看服务协议</a>-->
+            </li>
+            <li class="tab_con register-info" id="evcardForm">
+                <div class="login-phone">
+                    <input type="text" id="evcardName" placeholder="请输入EVCARD账号" autocomplete="off">
+                </div>
+                <div class="verify">
+                    <input type="password" id="evcardPwd" placeholder="请输入EVCARD密码" autocomplete="off">
+                </div>
+                <!--<a class="forget-pwd cl-gray txt-l"><input class="register-check" type="checkbox" checked="checked" disabled="disabled"> 同意服务协议</a>-->
+                <a  href="javascript:void(0);" class="login-btn" id="evcardLogin">登   录</a>
+                <a class="forget-pwd txt-c pos-botm w-100" href="agreement.html">查看服务协议</a>
+            </li>
+        </ul>
+    </section>
+    <script src="js/layer/layer.min.js"></script>
+    <script src="js/ajax.js"></script>
+<script>
+    (function(){
+        var loginObj = {
+            init: function(){
+                console.log("当前的跳转地址：");
+                console.log(localStorage.current_url);
+                loginObj.telLogin();
+                loginObj.evcardLogin();
+                loginObj.getBannerList();
+            },
+            getBannerList: function(){
+                $.ajaxByGet("/wechat/charge/banner/list","",function(data){
+                    if (data.code == 200) {//成功
+                        var imgs = data["data"];
+                        for(var i= 0,len=imgs.length;i<len;i++){
+                            console.log(imgs[i]["imgPath"]);
+                            console.log($(".swiper-slide:eq("+i+")").length);
+                            // $(".swiper-slide:eq("+i+")").empty().html("123");
+                            $(".swiper-slide").eq(i).empty().html('<img src="'+imgs[i]["imgPath"]+'" alt="slider img">');
+                        }
+                        var mySwiper = new Swiper ('.swiper-container', {
+                            direction: 'horizontal',
+                            loop: true,
+                            paginationType:'bullets',
+                            // 如果需要分页器
+                            pagination: '.swiper-pagination',
+                            // 如果需要前进后退按钮
+                            nextButton: '.swiper-button-next',
+                            prevButton: '.swiper-button-prev'
+                            // 如果需要滚动条
+                            //        scrollbar: '.swiper-scrollbar',
+                        });
+                        console.log(data);
+                    }else{
+                        layer.msg(data["message"]);
+                    }
+                });
+            },
+            login: function(args){//用户登陆
+                $.ajaxByPost("/wechat/user/login",args,function(data){
+                    if (data.code == 200) {//成功
+                        localStorage.token = data.data.token;
+                        if(localStorage.current_url&&localStorage.current_url != ""){
+                            window.location.href = localStorage.current_url;
+                        }else{
+                            window.location.href = "map.html";
+                        }
+                        console.log(data);
+                    }else{
+                        layer.msg(data["message"]);
+                    }
+                });
+            },
+            telLogin: function(){//手机登陆用户
+                $("#telLogin").on("click",function(){
+                    var isValidate = true;
+                    $("input","#telForm").each(function(){
+                        var $input = $(this);
+                        isValidate = loginObj.validate($input);
+                        return isValidate;
+                    });
+                    if(isValidate){
+                        var type = $(".sel-org:first").data("type");
+                        var args = {
+                            loginName:$("#telNum").valTrim(),
+                            password:$("#telPwd").valTrim(),
+                            type:type
+                        };
+                        loginObj.login(args);
+                    }
+                });
+            },
+            evcardLogin: function(){//evcard用户
+                $("#evcardLogin").on("click",function(){
+                    var isValidate = true;
+                    $("input","#evcardForm").each(function(){
+                        var $input = $(this);
+                        isValidate = loginObj.validate($input);
+                        return isValidate;
+                    });
+                    if(isValidate){
+                        var type = $(".sel-org:first").data("type");
+                        var args = {
+                            loginName:$("#evcardName").valTrim(),
+                            password:$("#evcardPwd").valTrim(),
+                            type:type
+                        };
+                        loginObj.login(args);
+                    }
+                });
+            },
+            validate: function(ele){
+                var msg = "";
+                var value = ele.valTrim(),
+                        id = ele.attr('id');
+                switch (id) {
+                    case 'telNum':
+                        if (value === "") {
+                            msg = "请输入手机号";
+                        }
+                        break;
+                    case 'telPwd':
+                        if (value === "") {
+                            msg = "请输入密码";
+                        }
+                        break;
+                    case 'evcardName':
+                        if (value === "") {
+                            msg = "请输入EVCARD账号";
+                        }
+                        break;
+                    case 'evcardPwd':
+                        if (value === "") {
+                            msg = '请输入EVCARD密码'
+                        }
+                        break;
+                }
+//                console.log(msg);
+                if (msg != "") {//校验失败
+                    layer.msg(msg);
+                    ele.addClass('border-error');
+                    return false;
+                } else {
+                    ele.removeClass('border-error');
+                }
+                return true;
+            }
+        };
+        $(loginObj.init);
+    })();
+</script>
+</body>
+</html>
