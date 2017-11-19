@@ -68,16 +68,17 @@
     <!--<script type='text/javascript' src='http://g.alicdn.com/sj/lib/zepto/zepto.min.js'></script>-->
     <script>
     $(function() {
+        var orderStatus;
         $.ajaxByPost("/wechat/charge/order/list", {
             page: 1,
-            token: 'a072db084cffb8fb3e730c0d8f7f011e' //localStorage.token
+            token: localStorage.token
         }, function(data) {
             if (data.code == 200) {
                 var d = data["data"];
                 if (d.length > 0) {
-                    var orderStatus = d[0]["orderStatus"];
+                    orderStatus = d[0]["orderStatus"];
                     var orderSeq = d[0]["orderSeq"];
-                    if (orderStatus !== 2) {
+                    if (orderStatus == 2 || orderStatus == 3 || orderStatus == 4) {
                         $('#unscanCharge').show();
                         $('#fixed_mark').show();
                     } else {
@@ -86,12 +87,19 @@
                 }
             }
         })
-        $('#fixed_mark .shcontrul').click(function() {
+        $('#fixed_mark .shcontrul .back_mark').click(function() {
             $('#fixed_mark .shcontrul').slideToggle();
         })
         $('#unscanCharge').click(function() {
             $('#fixed_mark .shcontrul').slideToggle();
         })
+        $('#fixed_mark .font_mark p').click(function() {
+            if (orderStatus == 4) {
+                location.href = "pay.html";
+            } else if (orderStatus == 2 || orderStatus == 3) {
+                location.href = "ready.html";
+            }
+        });
     })
     </script>
     <script>
