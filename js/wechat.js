@@ -47,58 +47,14 @@ $(function() {
                                     var codeQr = url;
                                     $.ajaxByPost("/wechat/charge/stake/scanCharging", {
                                         qrcode: codeQr, //二维码编号
-                                        token: localStorage.token
-                                        // orderSeq:(localStorage.orderSeq==undefined || localStorage.orderSeq=="") ? "" : localStorage.orderSeq
+                                        token: localStorage.token,
+                                        orderSeq: window.orderObj.orderSeq,
                                     }, function(data) {
                                         if (data.code == 200) { //成功
                                             var d = data["data"];
                                             window.location.href = "ready.html";
-                                        }
-                                        if (data.code == 30001) { //有未处理的订单
-
-                                            // 查询未处理的订单的状态
-                                            $.ajaxByPost("/wechat/charge/order/list", {
-                                                page: 1,
-                                                token: localStorage.token
-                                            }, function(data) {
-                                                if (data.code == 200) { //成功
-                                                    var d = data["data"];
-                                                    if (d.length > 0) {
-                                                        var orderStatus = d[0]["orderStatus"];
-                                                        var orderSeq = d[0]["orderSeq"];
-                                                        if (orderStatus == 2) { //有准备充电的未完成订单，进行取消订单操作
-                                                            if (window.confirm('您有未完成的订单,确认取消吗?')) {
-                                                                // 取消订单
-                                                                // 查询未处理的订单的状态
-                                                                $.ajaxByPost("/wechat/charge/order/cancel", {
-                                                                    orderSeq: orderSeq,
-                                                                    token: localStorage.token
-                                                                }, function(data) {
-                                                                    if (data.code == 200) { //成功
-                                                                        layer.msg("未完成的订单取消成功，请重新扫码");
-                                                                        return;
-                                                                    }
-                                                                }, true);
-                                                            } else {
-
-                                                            }
-
-
-                                                        } else if (orderStatus == 3) {
-                                                            window.location.href = "ready.html";
-                                                        } else if (orderStatus == 4) {
-                                                            window.location.href = "pay.html";
-                                                        }
-                                                        // localStorage.orderSeq = d[0]["orderSeq"];// 将订单编号存储起来，以便重新扫码时使用
-                                                    }
-                                                } else {
-                                                    layer.msg(data["message"]);
-                                                }
-                                            }, true);
-
                                         } else {
                                             layer.msg(data["message"]);
-                                            //window.location.href = "ready.html";
                                         }
                                     });
                                 } else {
@@ -172,3 +128,50 @@ $(function() {
     });
 
 });
+
+
+
+
+// else if (data.code == 30001) { //有未处理的订单
+
+//     // 查询未处理的订单的状态
+//     $.ajaxByPost("/wechat/charge/order/list", {
+//         page: 1,
+//         token: localStorage.token
+//     }, function(data) {
+//         if (data.code == 200) { //成功
+//             var d = data["data"];
+//             if (d.length > 0) {
+//                 var orderStatus = d[0]["orderStatus"];
+//                 var orderSeq = d[0]["orderSeq"];
+//                 if (orderStatus == 2) { //有准备充电的未完成订单，进行取消订单操作
+//                     if (window.confirm('您有未完成的订单,确认取消吗?')) {
+//                         // 取消订单
+//                         // 查询未处理的订单的状态
+//                         $.ajaxByPost("/wechat/charge/order/cancel", {
+//                             orderSeq: orderSeq,
+//                             token: localStorage.token
+//                         }, function(data) {
+//                             if (data.code == 200) { //成功
+//                                 layer.msg("未完成的订单取消成功，请重新扫码");
+//                                 return;
+//                             }
+//                         }, true);
+//                     } else {
+
+//                     }
+
+
+//                 } else if (orderStatus == 3) {
+//                     window.location.href = "ready.html";
+//                 } else if (orderStatus == 4) {
+//                     window.location.href = "pay.html";
+//                 }
+//                 // localStorage.orderSeq = d[0]["orderSeq"];// 将订单编号存储起来，以便重新扫码时使用
+//             }
+//         } else {
+//             layer.msg(data["message"]);
+//         }
+//     }, true);
+
+// }
