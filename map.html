@@ -80,7 +80,7 @@
                     orderStatus = d[0]["orderStatus"];
                     var orderSeq = d[0]["orderSeq"];
                     window.orderObj.orderSeq = orderSeq;
-                    if (orderStatus == 2 || orderStatus == 3 || orderStatus == 4) {
+                    if (orderStatus == 3 || orderStatus == 4) {
                         $('#unscanCharge').show();
                         $('#fixed_mark').show();
                     } else {
@@ -98,7 +98,7 @@
         $('#fixed_mark .font_mark p').click(function() {
             if (orderStatus == 4) {
                 location.href = "pay.html";
-            } else if (orderStatus == 2 || orderStatus == 3) {
+            } else if (orderStatus == 3) {
                 location.href = "ready.html";
             }
         });

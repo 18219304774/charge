@@ -48,10 +48,10 @@ $(function() {
                                     $.ajaxByPost("/wechat/charge/stake/scanCharging", {
                                         qrcode: codeQr, //二维码编号
                                         token: localStorage.token,
-                                        orderSeq: window.orderObj.orderSeq,
+                                        orderSeq: window.orderObj.orderSeq || '',
                                     }, function(data) {
                                         if (data.code == 200) { //成功
-                                            var d = data["data"];
+                                            //var d = data["data"];
                                             window.location.href = "ready.html";
                                         } else {
                                             layer.msg(data["message"]);

@@ -81,7 +81,7 @@
                     if (data.code == 200) {
                         //成功
                         console.log('成功');
-                        $('.remaind_bottom_block').slideToggle();
+                        $('#chargePage .remaind_bottom_block').slideToggle();
                         $('.remaind_div p').html('正在结束 . . .');
                         $('.pay_msg').hide();
                         $('.new-btn.mg-t-5').hide();
@@ -150,7 +150,7 @@
         },
         showBottomRemaind: function() {
             setTimeout(function() {
-                $('.remaind_bottom_block').slideToggle();
+                $('.ready .remaind_bottom_block').slideToggle();
             }, 60000);
         }
 
