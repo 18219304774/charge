@@ -84,6 +84,9 @@
                         $('#unscanCharge').show();
                         $('#fixed_mark').show();
                     } else {
+                        if (orderStatus == 2) {
+                            $('#fixed_mark').show();
+                        }
                         $('#scanCharge').show();
                     }
                 }
@@ -98,7 +101,7 @@
         $('#fixed_mark .font_mark p').click(function() {
             if (orderStatus == 4) {
                 location.href = "pay.html";
-            } else if (orderStatus == 3) {
+            } else if (orderStatus == 3 || orderStatus == 2) {
                 location.href = "ready.html";
             }
         });
