@@ -58,6 +58,7 @@
 <script>
 (function() {
     var internal;
+    var timeout;
     var readyObj = {
         orderSeq: "",
         init: function() {
@@ -149,14 +150,23 @@
             });
         },
         showBottomRemaind: function() {
-            setTimeout(function() {
-                $('.ready .remaind_bottom_block').slideToggle();
+            timeout = setTimeout(function() {
+                if ($.getUrlArgs().orderstatus !== '2') {
+                    $('.ready .remaind_bottom_block').slideToggle();
+                }
             }, 60000);
         }
 
     };
     $(readyObj.init);
 })();
+</script>
+<script>
+$(function() {
+    if ($.getUrlArgs().orderstatus === '2') {
+        layer.msg('点击下面的灰色 X 取消订单');
+    }
+})
 </script>
 
 </html>

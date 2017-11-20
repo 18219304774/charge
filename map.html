@@ -102,7 +102,7 @@
             if (orderStatus == 4) {
                 location.href = "pay.html";
             } else if (orderStatus == 3 || orderStatus == 2) {
-                location.href = "ready.html";
+                location.href = "ready.html?orderstatus=" + orderStatus;
             }
         });
     })
