@@ -48,7 +48,7 @@ $(function() {
                                     $.ajaxByPost("/wechat/charge/stake/scanCharging", {
                                         qrcode: codeQr, //二维码编号
                                         token: localStorage.token,
-                                        orderSeq: window.orderObj.orderSeq || '',
+                                        orderSeq: window.orderObj.orderStatus == 2 ? window.orderObj.orderSeq : '',
                                     }, function(data) {
                                         if (data.code == 200) { //成功
                                             //var d = data["data"];

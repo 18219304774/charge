@@ -14,13 +14,18 @@
     <div id="page">
         <!-- 地图容器 -->
         <div id="container" class="map" tabindex="0"></div>
-        <!--&lt;!&ndash; 搜索框&ndash;&gt;-->
-        <!--<div id="searchBox">-->
-        <!--<input id="tipinput" type="input" placeholder="搜索网点" />-->
-        <!--<div id="clearSearchBtn">-->
-        <!--<div class="del">&#10005;</div>-->
-        <!--</div>-->
-        <!--</div>-->
+        <!-- &lt;!&ndash; 搜索框&ndash;&gt; -->
+        <div id="searchBox">
+            <form action="javascript:void(0);">
+                <input id="tipinput" type="search" placeholder="搜索网点" />
+            </form>
+            <div id="clearSearchBtn">
+                <div class="del">&#10005;</div>
+            </div>
+            <div id="searchResult" class="hidden">
+                <ul></ul>
+            </div>
+        </div>
         <!-- 结果面板 -->
         <div id="panel" class="hidden">
             <!-- 隐藏按钮 -->
@@ -67,6 +72,159 @@
     <!--Just Zepto -->
     <!--<script type='text/javascript' src='http://g.alicdn.com/sj/lib/zepto/zepto.min.js'></script>-->
     <script>
+    //搜索
+    $(function() {
+        window.stationList = {};
+        $("#tipinput").focus(function() {
+            $('#searchResult').slideToggle();
+        })
+        $("#tipinput").blur(function() {
+            $('#searchResult').slideToggle();
+        })
+
+        $('#clearSearchBtn').click(function() {
+            $('#tipinput').val('');
+        });
+        //判断是从缓存还是接口获取充电桩列表
+        window.stationInit = function() {
+            listentInput();
+            if (localStorage.stations) {
+                var obj = JSON.parse(localStorage.stations);
+                if (obj && obj.day == $.getTimeDetail('now', 4)) {
+                    window.stationList = {
+                        all: addDistance(obj.data).sort(function(a, b) { return a.distance - b.distance }),
+                        show: addDistance(obj.data).sort(function(a, b) { return a.distance - b.distance })
+                    };
+                    createList();
+                } else {
+                    getStations();
+                }
+            } else {
+                getStations();
+            }
+        };
+
+        //监听输入
+        function listentInput() {
+            $('#tipinput').bind('input propertychange', function() {
+                var val = $('#tipinput').val();
+                val.replace(/^\s*|\s*$/g, '');
+                sortList(val);
+            });
+        };
+
+        // 排序
+        function sortList(val) {
+            var valList = val.split('');
+            valList.unshift(val);
+            var showList = window.stationList.show;
+            for (var j = 0; j < showList.length; j++) {
+                showList[j].sort = 0;
+                for (var i = 0; i < valList.length; i++) {
+                    var reg = new RegExp(valList[i], 'g');
+                    if (reg.test(showList[j].strStationName)) {
+                        showList[j].sort++;
+                        if (i == 0) {
+                            showList[j].sort += 100;
+                        }
+                    }
+                }
+            }
+            window.stationList.show.sort(function(a, b) {
+                if (a.sort == b.sort) {
+                    return a.distance - b.distance;
+                } else {
+                    return b.sort - a.sort;
+                }
+            });
+            createList();
+        }
+
+
+        //从接口获取充电桩列表
+        function getStations() {
+            $.ajaxByPost('/wechat/charge/station/list', {}, function(data) {
+                if (data.code == 200) {
+                    var da = data.data;
+                    var obj = {
+                        day: $.getTimeDetail('now', 4),
+                        data: da
+                    }
+                    localStorage.stations = JSON.stringify(obj);
+                    window.stationList.all = addDistance(da).sort(function(a, b) { return a.distance - b.distance });
+                    window.stationList.show = addDistance(da).sort(function(a, b) { return a.distance - b.distance });
+                    createList();
+                } else { console.log('获取充电站点数据失败') }
+            });
+        }
+
+        //创建搜索结果列表
+        function createList(list) {
+            var list = list || window.stationList.show;
+            var lis = '';
+            for (var i = 0; i < list.length; i++) {
+                var str = '';
+                str += '<li>';
+                str += '<div class="name">' + list[i].strStationName + '</div>';
+                str += '<div class="distan">' + list[i].distance.toFixed(2) + 'km</div>'
+                str += '<div style="display:none" class="stationSeq">' + list[i].stationSeq + '</div>'
+                str += '</li>';
+                lis += str;
+            }
+            $("#searchResult ul").html(lis);
+            setSelectStan();
+        }
+
+        //设置列表点击事件
+        function setSelectStan() {
+            $("#searchResult ul li").click(function(e) {
+                var li = $(e.target).parent('li') || $(e.target)
+                var stationSeq = li.find('.stationSeq').html();
+                var len = window.stationList.show.length;
+                for (var i = 0; i < len; i++) {
+                    if (window.stationList.show[i].stationSeq == stationSeq) {
+                        console.log(window.stationList.show[i].strStationName);
+                        var param = [window.stationList.show[i].longitude, window.stationList.show[i].latitude];
+                        moveToStation(param);
+                        break;
+                    }
+                }
+            });
+        }
+
+        function moveToStation(p) {
+            window.mapObj.setMapCenter(p);
+            window.mapObj.getChargeInfo(p);
+        }
+
+        function addDistance(list) {
+            var lat1 = window.mapObj.position[1] * 1;
+            var lng1 = window.mapObj.position[0] * 1;
+            for (var i = 0; i < list.length; i++) {
+                var distance = GetDistance(lat1, lng1, list[i].latitude, list[i].longitude);
+                list[i].distance = distance;
+            }
+            return list;
+        };
+
+        function GetDistance(lat1, lng1, lat2, lng2) {
+            function rad(d) {
+                return d * Math.PI / 180.0;
+            }
+            var radLat1 = rad(lat1);
+            var radLat2 = rad(lat2);
+            var a = radLat1 - radLat2;
+            var b = rad(lng1) - rad(lng2);
+            var s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) +
+                Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2), 2)));
+            s = s * 6378.137; // EARTH_RADIUS;
+            s = Math.round(s * 10000) / 10000;
+            return s;
+        }
+    })
+    </script>
+    <script>
+    //充电流程
     $(function() {
         var orderStatus;
         window.orderObj = {};
@@ -80,6 +238,7 @@
                     orderStatus = d[0]["orderStatus"];
                     var orderSeq = d[0]["orderSeq"];
                     window.orderObj.orderSeq = orderSeq;
+                    window.orderObj.orderStatus = orderStatus;
                     if (orderStatus == 3 || orderStatus == 4) {
                         $('#unscanCharge').show();
                         $('#fixed_mark').show();
@@ -114,7 +273,7 @@
         zoom: 16
     });
     (function() {
-        var mapObj = {
+        window.mapObj = {
             invitedCode: "",
             init: function() {
                 mapObj.mapBack();
@@ -137,10 +296,12 @@
                     geolocation.getCurrentPosition();
                     AMap.event.addListener(geolocation, 'complete', function(data) {
                         var position = data.position;
+                        console.log(position);
                         mapObj.position = [position.getLng(), position.getLat()];
                         mapObj.setMapCenter(mapObj.position);
                         //                            console.log(position);
-                        mapObj.getChargeInfo();
+                        mapObj.getChargeInfo(mapObj.position);
+                        stationInit(); //充电桩列表
                     }); //返回定位信息
                     AMap.event.addListener(geolocation, 'error', function(error) {
                         //                            layer.msg("定位失败");
@@ -148,10 +309,10 @@
                     }); //返回定位出错信息
                 });
             },
-            getChargeInfo: function() { //获取周边充电宝
+            getChargeInfo: function(p) { //获取周边充电宝
                 $.ajaxByPost("/wechat/charge/station/listPosition", {
-                    longitude: mapObj.position[0],
-                    latitude: mapObj.position[1]
+                    longitude: p[0],
+                    latitude: p[1]
                 }, function(data) {
                     if (data.code == 200) { //成功
                         console.log(data);

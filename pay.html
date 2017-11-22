@@ -28,7 +28,7 @@
                 <p>能量球</p>
             </div>
             <div>
-                <p>-122.09颗</p>
+                <p id="pay_total">-122.09颗</p>
             </div>
         </div>
         <div class="pay_msg_box flex">
@@ -36,7 +36,7 @@
                 <p>本次充电耗时</p>
             </div>
             <div>
-                <p>23小时37分</p>
+                <p id="send_tiem">23小时37分</p>
             </div>
         </div>
     </div>
@@ -69,6 +69,12 @@
                             $("#chargeTotal").html(((d[0]["chargeTotal"]) / 1000).toFixed(2));
                             $("#costTime").html($.getSfm(d[0]["costTime"]));
                             $("#amountHas").html(amount);
+                            $("#pay_total").html('- ' + d[0]["amount"] + ' 颗');
+                            var costTime = $.getSfm(d[0].costTime).split(':');
+                            var tstring = costTime[0] ? costTime[0] + '小时' : '';
+                            tstring += costTime[1] ? costTime[1] + '分' : '';
+                            tstring += costTime[2] ? costTime[2] + '秒' : '';
+                            $("#send_tiem").html(tstring);
                         }
                     } else {
                         layer.msg(data["message"]);
