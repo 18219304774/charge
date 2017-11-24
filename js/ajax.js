@@ -1,7 +1,7 @@
 /**
  * Created by GraceLea on 2017/10/23.
  */
-window.host = "http://wx.xgyjsx.com/chargestation";
+window.host = "https://wx.xgyjsx.com/chargestation";
 $.extend({
     /**
      * @param ele  分页容器
@@ -9,13 +9,13 @@ $.extend({
      * @param pageselectCallback  //回调函数
      * @param per_items  //每页显示的数据条目
      */
-    paging: function (ele, num_entries, pageselectCallback, per_items) {
+    paging: function(ele, num_entries, pageselectCallback, per_items) {
         per_items = per_items || 10;
         ele.pagination(num_entries, {
             current_page: 0,
             callback: pageselectCallback,
             items_per_page: per_items, //每页显示10项
-            load_first_page:false,
+            load_first_page: false,
             num_edge_entries: 1, //边缘页数
             num_display_entries: 4, //主体页数
             prev_text: "上一页",
@@ -28,33 +28,33 @@ $.extend({
      * @param d
      * @param callback
      */
-    ajaxByGet: function (url, d, callback) {
+    ajaxByGet: function(url, d, callback) {
         var loadIndex = layer.load();
         jQuery.ajax({
-            url: window.host+url,
+            url: window.host + url,
             type: 'GET',
             data: d,
             dataType: 'json',
-            success: function (data) {
-                if(data.code==201) {
+            success: function(data) {
+                if (data.code == 201) {
                     layer.msg("Created");
-                }else if(data.code==401) {
+                } else if (data.code == 401) {
                     layer.msg("Unauthorized");
-                }else if(data.code==403) {
+                } else if (data.code == 403) {
                     layer.msg("Unauthorized");
-                }else if(data.code==404){//过期
+                } else if (data.code == 404) { //过期
                     layer.msg("Not Found");
-                }else if(data.code == 20007||data.code == 740) {
-                    if(url != "/wechat/user/login"){
+                } else if (data.code == 20007 || data.code == 740) {
+                    if (url != "/wechat/user/login") {
                         localStorage.current_url = window.location.href;
                     }
                     window.location.href = "login.html";
-                }else{
+                } else {
                     callback(data);
                 }
                 layer.close(loadIndex);
             },
-            error: function () {
+            error: function() {
                 layer.close(loadIndex);
                 localStorage.current_url = "";
                 layer.msg('获取数据失败请稍后再试！');
@@ -67,119 +67,119 @@ $.extend({
      * @param d
      * @param callback
      */
-    ajaxByPost: function (url, d, callback,loading) {
-        loading = loading==undefined?false:true;
+    ajaxByPost: function(url, d, callback, loading) {
+        loading = loading == undefined ? false : true;
         var loadIndex;
-        if(!loading)(
-            loadIndex =layer.load()
+        if (!loading)(
+            loadIndex = layer.load()
         );
         jQuery.ajax({
-            url:  window.host+url,
+            url: window.host + url,
             type: 'POST',
             data: d,
             dataType: 'json',
-            success: function (data) {
-                if(data.code==201) {
+            success: function(data) {
+                if (data.code == 201) {
                     layer.msg("Created");
-                }else if(data.code==401) {
+                } else if (data.code == 401) {
                     layer.msg("Unauthorized");
-                }else if(data.code==403) {
+                } else if (data.code == 403) {
                     layer.msg("Unauthorized");
-                }else if(data.code==404){//过期
+                } else if (data.code == 404) { //过期
                     layer.msg("Not Found");
-                }else if(data.code == 20007||data.code == 740) {
-                    if(url != "/wechat/user/login"){
+                } else if (data.code == 20007 || data.code == 740) {
+                    if (url != "/wechat/user/login") {
                         localStorage.current_url = window.location.href;
                     }
                     window.location.href = "login.html";
-                }else{
+                } else {
                     callback(data);
                 }
                 layer.close(loadIndex);
             },
-            error: function () {
+            error: function() {
                 layer.close(loadIndex);
                 localStorage.current_url = "";
                 layer.msg('获取数据失败请稍后再试！');
             }
         });
     },
-    onlyNum: function(ele){ //文本框只能输入数字
-        ele.on('keyup',function(event){
+    onlyNum: function(ele) { //文本框只能输入数字
+        ele.on('keyup', function(event) {
             var $this = $(this);
-            $this.val($this.val().replace(/[^\d.]/g,''));
+            $this.val($this.val().replace(/[^\d.]/g, ''));
         });
     },
-    getUrlArgs: function(url){//得到地址传递的参数，返回： 参数对象
+    getUrlArgs: function(url) { //得到地址传递的参数，返回： 参数对象
         url = url || window.location.href;
         url = decodeURIComponent(url);
-        var argsString = (url.indexOf('?') === -1)?"":url.substring(url.indexOf('?')+1);
-        var arrObj={};
-        if(argsString !== ""){
+        var argsString = (url.indexOf('?') === -1) ? "" : url.substring(url.indexOf('?') + 1);
+        var arrObj = {};
+        if (argsString !== "") {
             argsString = argsString.split('&');
-            for(var i=0;i<argsString.length;i++){
+            for (var i = 0; i < argsString.length; i++) {
                 var key = argsString[i].split('=')[0];
                 arrObj[key] = argsString[i].split('=')[1];
             }
         }
         return arrObj;
     },
-    getTimeDetail: function (time, typeFormat) {
+    getTimeDetail: function(time, typeFormat) {
         var dateTime;
-        if(time === 'now'){
+        if (time === 'now') {
             dateTime = new Date();
-        }else{
+        } else {
             time = parseInt(time);
             dateTime = new Date(time);
         }
         console.log(dateTime);
-        var zeroAdd = function (val) {
+        var zeroAdd = function(val) {
             if (val < 10) {
                 val = "0" + val;
             }
             return val;
         };
         var detail = {
-            year: dateTime.getFullYear(),  //年
-            month: zeroAdd(parseInt(dateTime.getMonth() + 1)),    //月
-            date: zeroAdd(dateTime.getDate()),       //日
-            hour: zeroAdd(dateTime.getHours()),   //时
-            minute: zeroAdd(dateTime.getMinutes()),  //分
-            second: zeroAdd(dateTime.getSeconds()),  //秒
-            week: dateTime.getDay()       //星期几[0:表示星期天，1-6: 星期一到星期六]
+            year: dateTime.getFullYear(), //年
+            month: zeroAdd(parseInt(dateTime.getMonth() + 1)), //月
+            date: zeroAdd(dateTime.getDate()), //日
+            hour: zeroAdd(dateTime.getHours()), //时
+            minute: zeroAdd(dateTime.getMinutes()), //分
+            second: zeroAdd(dateTime.getSeconds()), //秒
+            week: dateTime.getDay() //星期几[0:表示星期天，1-6: 星期一到星期六]
 
         };
         if (typeFormat == 1) {
             return detail.year + "年" + detail.month + "月" + detail.date + "日    " + detail.hour + ":" + detail.minute + ":" + detail.second;
-        }else if(typeFormat == 2){
-            return detail.year + "-" + detail.month + "-" + detail.date +" "+ detail.hour + ":" + detail.minute;
-        }else if(typeFormat == 3){
-            return detail.year + "-" + detail.month + "-" + detail.date +" 23:59";
-        }else if(typeFormat == 4){
+        } else if (typeFormat == 2) {
+            return detail.year + "-" + detail.month + "-" + detail.date + " " + detail.hour + ":" + detail.minute;
+        } else if (typeFormat == 3) {
+            return detail.year + "-" + detail.month + "-" + detail.date + " 23:59";
+        } else if (typeFormat == 4) {
             return detail.year + "." + detail.month + "." + detail.date;
-        }else {
+        } else {
             return detail;
         }
     },
-    getTimeStr : function (time) {
+    getTimeStr: function(time) {
         var str = {
-            year : time.substring(0,4),
-            month : time.substring(4,6),
-            date : time.substring(6,8),
-            hour : time.substring(8,10),
-            minute : time.substring(10,12),
-            second : time.substring(12,14)
+            year: time.substring(0, 4),
+            month: time.substring(4, 6),
+            date: time.substring(6, 8),
+            hour: time.substring(8, 10),
+            minute: time.substring(10, 12),
+            second: time.substring(12, 14)
         };
         return str.year + "-" + str.month + "-" + str.date + " " + str.hour + ":" + str.minute + ":" + str.second;
     },
-    getSfm: function(seconds){
+    getSfm: function(seconds) {
         var h = Math.floor(seconds / 3600);
         var m = Math.floor((seconds / 60 % 60));
         var s = Math.floor((seconds % 60));
         return h + ":" + m + ":" + s;
     },
-    getOrderStatus : function (orderStatus) {
-        var  reStatus;
+    getOrderStatus: function(orderStatus) {
+        var reStatus;
         switch (orderStatus) {
             case 0:
                 reStatus = "取消";
@@ -192,20 +192,20 @@ $.extend({
             default:
                 reStatus = "已完成";
 
-             return reStatus;
+                return reStatus;
         }
     },
-    isLogin: function(){
-        if(localStorage.token&&localStorage.token!=""){
+    isLogin: function() {
+        if (localStorage.token && localStorage.token != "") {
             localStorage.current_url = "";
             return false;
-        }else{//未登录
+        } else { //未登录
             localStorage.current_url = window.location.href;
             window.location.href = "login.html";
             return true;
         }
     }
 });
-jQuery.fn.valTrim = function(){
+jQuery.fn.valTrim = function() {
     return $(this).val().trim();
 };

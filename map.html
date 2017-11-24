@@ -63,12 +63,12 @@
     <script src="js/jquery-3.2.1.min.js"></script>
     <script src="js/layer/layer.js"></script>
     <script src="js/ajax.js"></script>
-    <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
     <script src="js/wechat.js"></script>
-    <script type="text/javascript" src='http://webapi.amap.com/maps?v=1.3&test=true&key=bfe31f4e0fb231d29e1d3ce951e2c780&plugin=AMap.ToolBar,AMap.MarkerClusterer,AMap.Geolocation'></script>
-    <!--<script type="text/javascript" src='http://webapi.amap.com/maps?v=1.3&test=true&plugin=AMap.ToolBar&key=bfe31f4e0fb231d29e1d3ce951e2c780'></script>-->
+    <script type="text/javascript" src='https://webapi.amap.com/maps?v=1.3&test=true&key=d9e21a3bb19e063ffaa299407c25ff94&plugin=AMap.ToolBar,AMap.MarkerClusterer,AMap.Geolocation'></script>
+    <!--<script type="text/javascript" src='https://webapi.amap.com/maps?v=1.3&test=true&plugin=AMap.ToolBar&key=bfe31f4e0fb231d29e1d3ce951e2c780'></script>-->
     <!--缩放按钮 -->
-    <script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
+    <script type="text/javascript" src="https://cache.amap.com/lbs/static/addToolbar.js"></script>
     <!--Just Zepto -->
     <!--<script type='text/javascript' src='http://g.alicdn.com/sj/lib/zepto/zepto.min.js'></script>-->
     <script>
@@ -109,9 +109,31 @@
             $('#tipinput').bind('input propertychange', function() {
                 var val = $('#tipinput').val();
                 val.replace(/^\s*|\s*$/g, '');
-                sortList(val);
+                if (!val) {
+                    resetBox();
+                } else {
+                    window.placeSearch.search(val, function(status, result) {
+                        if (status == 'complete' && result.info == 'OK') {
+                            window.stationList.poiList = addDistance(result.poiList.pois);
+                            for (var i = 0; i < window.stationList.poiList.length; i++) {
+                                window.stationList.poiList[i].strStationName = window.stationList.poiList[i].name;
+                                window.stationList.poiList[i].stationSeq = window.stationList.poiList[i].id;
+                                window.stationList.poiList[i].longitude = window.stationList.poiList[i].location.lng;
+                                window.stationList.poiList[i].latitude = window.stationList.poiList[i].location.lat;
+                            }
+                            createList(window.stationList.poiList);
+                        }
+                    })
+                }
+                //sortList(val);
             });
         };
+
+        function resetBox() {
+            $('#tipinput').val('');
+            window.stationList.poiList = [];
+            createList(window.stationList.show);
+        }
 
         // 排序
         function sortList(val) {
@@ -146,6 +168,7 @@
             $.ajaxByPost('/wechat/charge/station/list', {}, function(data) {
                 if (data.code == 200) {
                     var da = data.data;
+                    initLngLat(da);
                     var obj = {
                         day: $.getTimeDetail('now', 4),
                         data: da
@@ -158,13 +181,36 @@
             });
         }
 
+        function LngLat(p) {
+            var x_pi = 3.14159265358979324 * 3000.0 / 180.0;
+            var lat = p[1] - 0.006,
+                lng = p[0] - 0.0065;
+            var z = Math.sqrt(lng * lng + lat * lat) - 0.00002 * Math.sin(lat * x_pi);
+            var theta = Math.atan2(lat, lng) - 0.000003 * Math.cos(lng * x_pi);
+            var l = [z * Math.cos(theta), z * Math.sin(theta)];
+            return l;
+        }
+
+        function initLngLat(da) {
+            for (var i = 0; i < da.length; i++) {
+                var p = [da[i].longitude, da[i].latitude];
+                var lngLatArray = LngLat(p)
+                da[i].longitude = lngLatArray[0];
+                da[i].latitude = lngLatArray[1];
+            }
+        }
+        window.initLngLat = initLngLat;
         //创建搜索结果列表
         function createList(list) {
             var list = list || window.stationList.show;
             var lis = '';
             for (var i = 0; i < list.length; i++) {
                 var str = '';
-                str += '<li>';
+                if (list[i].sort === 0) {
+                    str += '<li style="display:none;">';
+                } else {
+                    str += '<li>';
+                }
                 str += '<div class="name">' + list[i].strStationName + '</div>';
                 str += '<div class="distan">' + list[i].distance.toFixed(2) + 'km</div>'
                 str += '<div style="display:none" class="stationSeq">' + list[i].stationSeq + '</div>'
@@ -178,17 +224,25 @@
         //设置列表点击事件
         function setSelectStan() {
             $("#searchResult ul li").click(function(e) {
-                var li = $(e.target).parent('li') || $(e.target)
+                var li = $(e.target).parent('li') || $(e.target);
+                var list;
                 var stationSeq = li.find('.stationSeq').html();
-                var len = window.stationList.show.length;
+                var len = window.stationList.poiList ? window.stationList.poiList.length : 0;
+                if (len) {
+                    list = window.stationList.poiList;
+                } else {
+                    list = window.stationList.show;
+                    len = window.stationList.show.length;
+                }
                 for (var i = 0; i < len; i++) {
-                    if (window.stationList.show[i].stationSeq == stationSeq) {
-                        console.log(window.stationList.show[i].strStationName);
-                        var param = [window.stationList.show[i].longitude, window.stationList.show[i].latitude];
+                    if (list[i].stationSeq == stationSeq) {
+                        console.log(list[i].strStationName);
+                        var param = [list[i].longitude, list[i].latitude];
                         moveToStation(param);
                         break;
                     }
                 }
+                setTimeout(resetBox, 300);
             });
         }
 
@@ -201,7 +255,9 @@
             var lat1 = window.mapObj.position[1] * 1;
             var lng1 = window.mapObj.position[0] * 1;
             for (var i = 0; i < list.length; i++) {
-                var distance = GetDistance(lat1, lng1, list[i].latitude, list[i].longitude);
+                var lat = list[i].latitude || list[i].latitude === 0 ? list[i].latitude : list[i].location.lat;
+                var long = list[i].longitude || list[i].longitude === 0 ? list[i].longitude : list[i].location.lng;
+                var distance = GetDistance(lat1, lng1, lat, long);
                 list[i].distance = distance;
             }
             return list;
@@ -223,6 +279,14 @@
             return s;
         }
     })
+    $(window).resize(function() {
+        var orderStatus = window.orderObj.orderStatus;
+        if (orderStatus == 3 || orderStatus == 4) {
+            $('#unscanCharge').slideToggle();
+        } else {
+            $('#scanCharge').slideToggle();
+        }
+    });
     </script>
     <script>
     //充电流程
@@ -251,7 +315,8 @@
                     }
                 }
             } else {
-                layer.msg(data.message)
+                layer.msg(data.message);
+                $('#scanCharge').show();
             }
         })
         $('#fixed_mark .shcontrul .back_mark').click(function() {
@@ -270,6 +335,9 @@
     })
     </script>
     <script>
+    function toGlng(lng) { return lng + 0 /*0.00609*/ }
+
+    function toGlat(lat) { return lat - 0 /*0.01134*/ }
     //创建地图
     var map = new AMap.Map('container', {
         resizeEnable: true,
@@ -281,6 +349,7 @@
             init: function() {
                 mapObj.mapBack();
                 mapObj.geoLocation();
+                mapObj.searchMap();
             },
             position: ["121.170006", "31.291020"],
             geoLocation: function() {
@@ -291,7 +360,7 @@
                         maximumAge: 0, //定位结果缓存0毫秒，默认：0
                         convert: true, //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
                         showButton: false, //显示定位按钮，默认：true
-                        showMarker: true, //定位成功后在定位到的位置显示点标记，默认：true
+                        showMarker: false, //定位成功后在定位到的位置显示点标记，默认：true
                         panToLocation: true, //定位成功后将定位到的位置作为地图中心点，默认：true
                         zoomToAccuracy: true //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
                     });
@@ -299,7 +368,7 @@
                     geolocation.getCurrentPosition();
                     AMap.event.addListener(geolocation, 'complete', function(data) {
                         var position = data.position;
-                        mapObj.position = [position.getLng(), position.getLat()];
+                        mapObj.position = [toGlng(position.getLng()), toGlat(position.getLat())];
                         mapObj.setMapCenter(mapObj.position);
                         //                            console.log(position);
                         mapObj.getChargeInfo(mapObj.position);
@@ -320,6 +389,7 @@
                         console.log(data);
                         var d = data["data"],
                             markers = [];
+                        window.initLngLat(d);
                         for (var i = 0, len = d.length; i < len; i++) {
                             var marker = mapObj.addMarker(d[i]);
                             markers.push(marker);
@@ -468,67 +538,15 @@
                     content: content
                 });
             },
-            checkPoiList: function() { //检查结果列表是否为空， 为空时显示必要的提示，即#emptyTip
-                $('#panel').toggleClass('empty', !($.trim($('#poiList').html())));
-            },
-            // searchMap: function() {
-            //     //搜索框支持自动完成提示
-            //     var auto = new AMap.Autocomplete({
-            //         input: "tipinput"
-            //     });
-            //     //构造地点查询类
-            //     var placeSearch = new AMap.PlaceSearch({
-            //         pageSize: 5,
-            //         pageIndex: 1,
-            //         map: map,
-            //         panel: "poiList"
-            //     });
-            //     //监听搜索框的提示选中事件
-            //     AMap.event.addListener(auto, "select", function(e) {
+            searchMap: function() {
+                AMap.service('AMap.PlaceSearch', function() { //回调函数
+                    //实例化PlaceSearch
+                    window.placeSearch = new AMap.PlaceSearch();
+                    window.placeSearch.setCity('上海');
+                    window.placeSearch.setType('汽车服务|汽车销售|汽车维修|摩托车服务|餐饮服务|购物服务|生活服务|体育休闲服务|医疗保健服务|住宿服务|风景名胜|商务住宅|政府机构及社会团体|科教文化服务|交通设施服务|金融保险服务|公司企业|道路附属设施|地名地址信息|公共设施');
+                })
+            }
 
-            //         //设置搜索的城市
-            //         placeSearch.setCity(e.poi.adcode);
-            //         //开始搜索对应的poi名称
-            //         placeSearch.search(e.poi.name, function(status, results) {
-
-            //             if (results.pois && results.pois.length > 0) {
-            //                 $('#panel').toggleClass('empty');
-            //             }
-
-            //             //显示结果列表
-            //             $('#panel').removeClass('hidden');
-
-            //             //隐藏loading状态
-            //             $(document.body).removeClass('searching');
-            //         });
-            //         //显示loading状态
-            //         $(document.body).addClass('searching');
-            //     });
-            //     mapObj.checkPoiList();
-            //     //监听搜索列表的渲染完成事件
-            //     AMap.event.addListener(mapObj.placeSearch, 'renderComplete', function() {
-            //         checkPoiList();
-            //     });
-            //     //监听marker/列表的选中事件
-            //     AMap.event.addListener(mapObj.placeSearch, 'selectChanged', function(results) {
-            //         //获取当前选中的结果数据
-            //         console.log(results.selected.data);
-            //     });
-            //     $('#showHideBtn').click(function() {
-            //         $('#panel').toggleClass('hidden');
-            //     });
-
-            //     $('#clearSearchBtn').click(function() {
-
-            //         //清除搜索框内容
-            //         $('#tipinput').val('');
-
-            //         //清除结果列表
-            //         placeSearch.clear();
-            //         $('#panel').addClass('hidden');
-            //         mapObj.checkPoiList();
-            //     });
-            // }
         };
         $(mapObj.init);
     })();

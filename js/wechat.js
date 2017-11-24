@@ -1,8 +1,8 @@
-var shareLink = 'http://wx.xgyjsx.com/charge/get-hb.html';
+var shareLink = 'https://wx.xgyjsx.com/charge/get-hb.html';
 var lineLink = window.location.href;
 //var host=window.location.host;
-var host = "http://wx.xgyjsx.com/chargestation";
-var urlimage = 'http://' + host + '/images/code.png';
+var host = "https://wx.xgyjsx.com/chargestation";
+var urlimage = 'https://' + host + '/images/code.png';
 var tilist = [{ title: "test好友邀请标题", content: "test好友邀请内容" },
     { title: "test好友邀请标题。1", content: "111111" },
     { title: "test好友邀请标题2", content: "222222222222" }
