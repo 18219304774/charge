@@ -390,6 +390,18 @@
                         var d = data["data"],
                             markers = [];
                         window.initLngLat(d);
+                        if (d.length === 0) {
+                            var div = document.createElement('div');
+                            div.text = '哈哈';
+                            div.style = "width:50px; heigth:50px;padding:10px;text-align:center;"
+                            var obj = {
+                                position: p,
+                                map: mapObj,
+                                offset: new AMap.Pixel(-10, -15),
+                                content: div,
+                            }
+                            new AMap.Marker(obj);
+                        }
                         for (var i = 0, len = d.length; i < len; i++) {
                             var marker = mapObj.addMarker(d[i]);
                             markers.push(marker);
