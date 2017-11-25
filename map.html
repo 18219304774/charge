@@ -14,18 +14,6 @@
     <div id="page">
         <!-- 地图容器 -->
         <div id="container" class="map" tabindex="0"></div>
-        <!-- &lt;!&ndash; 搜索框&ndash;&gt; -->
-        <div id="searchBox">
-            <form action="javascript:void(0);">
-                <input id="tipinput" type="search" placeholder="搜索网点" />
-            </form>
-            <div id="clearSearchBtn">
-                <div class="del">&#10005;</div>
-            </div>
-            <div id="searchResult" class="hidden">
-                <ul></ul>
-            </div>
-        </div>
         <!-- 结果面板 -->
         <div id="panel" class="hidden">
             <!-- 隐藏按钮 -->
@@ -58,6 +46,18 @@
         <a href="javascript:;" id="unscanCharge"><img src="images/code_limit.png" alt=""></a>
         <!--<label id="pos-pile"></label>-->
     </aside>
+    <!-- &lt;!&ndash; 搜索框&ndash;&gt; -->
+    <div id="searchBox">
+        <form action="javascript:void(0);">
+            <input id="tipinput" type="search" placeholder="搜索网点" />
+        </form>
+        <div id="clearSearchBtn">
+            <div class="del">&#10005;</div>
+        </div>
+        <div id="searchResult" class="hidden">
+            <ul></ul>
+        </div>
+    </div>
     <a href="javascript:void(0);" id="mapBack"><img src="images/gps.png" width="30" height="30"></a>
     <!--引入jsapi -->
     <script src="js/jquery-3.2.1.min.js"></script>
@@ -279,63 +279,69 @@
             return s;
         }
     })
-    $(window).resize(function() {
-        var orderStatus = window.orderObj.orderStatus;
-        if (orderStatus == 3 || orderStatus == 4) {
-            $('#unscanCharge').slideToggle();
-        } else {
-            $('#scanCharge').slideToggle();
-        }
-    });
+    // $(window).resize(function() {
+    //     var orderStatus = window.orderObj.orderStatus;
+    //     if (orderStatus == 3 || orderStatus == 4) {
+    //         $('#unscanCharge').slideToggle();
+    //     } else {
+    //         $('#scanCharge').slideToggle();
+    //     }
+    // });
     </script>
     <script>
     //充电流程
     $(function() {
-        var orderStatus;
-        window.orderObj = {};
-        $.ajaxByPost("/wechat/charge/order/list", {
-            page: 1,
-            token: localStorage.token
-        }, function(data) {
-            if (data.code == 200) {
-                var d = data["data"];
-                if (d.length > 0) {
-                    orderStatus = d[0]["orderStatus"];
-                    var orderSeq = d[0]["orderSeq"];
-                    window.orderObj.orderSeq = orderSeq;
-                    window.orderObj.orderStatus = orderStatus;
-                    if (orderStatus == 3 || orderStatus == 4) {
-                        $('#unscanCharge').show();
-                        $('#fixed_mark').show();
-                    } else {
-                        if (orderStatus == 2) {
+        if (localStorage.token) {
+            var orderStatus;
+            window.orderObj = {};
+            $.ajaxByPost("/wechat/charge/order/list", {
+                page: 1,
+                token: localStorage.token
+            }, function(data) {
+                if (data.code == 200) {
+                    var d = data["data"];
+                    if (d.length > 0) {
+                        orderStatus = d[0]["orderStatus"];
+                        var orderSeq = d[0]["orderSeq"];
+                        window.orderObj.orderSeq = orderSeq;
+                        window.orderObj.orderStatus = orderStatus;
+                        if (orderStatus == 3 || orderStatus == 4) {
+                            $('#unscanCharge').show();
                             $('#fixed_mark').show();
+                        } else {
+                            if (orderStatus == 2) {
+                                $('#fixed_mark').show();
+                            }
+                            $('#scanCharge').show();
                         }
+                    } else {
                         $('#scanCharge').show();
                     }
+                } else {
+                    if (/\w*\s*token\s*\w*/.test(data.message)) {
+                        location.href = "login.html";
+                        return;
+                    }
+                    layer.msg(data.message);
+                    $('#scanCharge').show();
                 }
-            } else {
-                if (/\w*\s*token\s*\w*/.test(data.message)) {
-                    location.href = "login.html";
-                    return;
+            })
+            $('#fixed_mark .shcontrul .back_mark').click(function() {
+                $('#fixed_mark .shcontrul').slideToggle();
+            })
+            $('#unscanCharge').click(function() {
+                $('#fixed_mark .shcontrul').slideToggle();
+            })
+            $('#fixed_mark .font_mark p').click(function() {
+                if (orderStatus == 4) {
+                    location.href = "pay.html";
+                } else if (orderStatus == 3 || orderStatus == 2) {
+                    location.href = "ready.html?orderstatus=" + orderStatus;
                 }
-                layer.msg(data.message);
-                $('#scanCharge').show();
-            }
-        })
-        $('#fixed_mark .shcontrul .back_mark').click(function() {
-            $('#fixed_mark .shcontrul').slideToggle();
-        })
-        $('#unscanCharge').click(function() {
-            $('#fixed_mark .shcontrul').slideToggle();
-        })
-        $('#fixed_mark .font_mark p').click(function() {
-            if (orderStatus == 4) {
-                location.href = "pay.html";
-            } else if (orderStatus == 3 || orderStatus == 2) {
-                location.href = "ready.html?orderstatus=" + orderStatus;
-            }
-        });
+            });
+        } else {
+            $('#scanCharge').show();
+        }
     })
     </script>
     <script>

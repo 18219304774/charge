@@ -100,7 +100,7 @@
                     break;
                 case 'verifyCode':
                     if (value === "") {
-                        msg = "请输入6位验证码";
+                        msg = "请输入验证码";
                     }
                     break;
             }
@@ -127,15 +127,31 @@
                         mobilePhone: $("#tel").valTrim(),
                         password: $("#userPwd").valTrim(),
                         verifyCode: $("#verifyCode").valTrim(),
-                        invitedCode: $("#invitedCode").valTrim()
+                        invitedCode: '' //$("#invitedCode").valTrim()
                     }, function(data) {
                         if (data.code == 200) { //成功
-                            window.location.href = "register-success.html";
+                            //window.location.href = "register-success.html";
+                            registerObj.login();
                             console.log(data);
                         } else {
                             layer.msg(data["message"]);
                         }
                     });
+                }
+            });
+        },
+        login: function() {
+            var param = {
+                loginName: $("#tel").valTrim(),
+                password: $("#userPwd").valTrim(),
+                type: 0
+            };
+            $.ajaxByPost("/wechat/user/login", param, function(data) {
+                if (data.code == 200) { //成功
+                    window.location.href = "register-success.html";
+                    console.log(data);
+                } else {
+                    layer.msg(data["message"]);
                 }
             });
         }
