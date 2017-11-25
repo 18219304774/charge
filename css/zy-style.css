@@ -210,9 +210,12 @@ button {
     -webkit-tap-highlight-color: transparent;
 }
 
+.foot {
+    text-align: center;
+    margin: 0 0 30px;
+}
+
 .pos-botm {
-    position: fixed;
-    bottom: 1rem;
     font-size: 0.8rem;
     color: #000;
 }
@@ -902,6 +905,10 @@ a {
 
 .mg-t-5 .login-btn {
     margin-top: 7rem !important;
+}
+
+.build-list.mg-t-5 .login-btn {
+    margin-top: 3rem !important;
 }
 
 .cl-org {

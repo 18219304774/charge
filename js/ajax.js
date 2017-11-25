@@ -1,7 +1,7 @@
 /**
  * Created by GraceLea on 2017/10/23.
  */
-window.host = "https://wx.xgyjsx.com/chargestation";
+window.host = "http://wx.xgyjsx.com/chargestation";
 $.extend({
     /**
      * @param ele  分页容器

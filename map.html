@@ -63,12 +63,12 @@
     <script src="js/jquery-3.2.1.min.js"></script>
     <script src="js/layer/layer.js"></script>
     <script src="js/ajax.js"></script>
-    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
     <script src="js/wechat.js"></script>
-    <script type="text/javascript" src='https://webapi.amap.com/maps?v=1.3&test=true&key=d9e21a3bb19e063ffaa299407c25ff94&plugin=AMap.ToolBar,AMap.MarkerClusterer,AMap.Geolocation'></script>
-    <!--<script type="text/javascript" src='https://webapi.amap.com/maps?v=1.3&test=true&plugin=AMap.ToolBar&key=bfe31f4e0fb231d29e1d3ce951e2c780'></script>-->
+    <script type="text/javascript" src='http://webapi.amap.com/maps?v=1.3&test=true&key=d9e21a3bb19e063ffaa299407c25ff94&plugin=AMap.ToolBar,AMap.MarkerClusterer,AMap.Geolocation'></script>
+    <!--<script type="text/javascript" src='http://webapi.amap.com/maps?v=1.3&test=true&plugin=AMap.ToolBar&key=bfe31f4e0fb231d29e1d3ce951e2c780'></script>-->
     <!--缩放按钮 -->
-    <script type="text/javascript" src="https://cache.amap.com/lbs/static/addToolbar.js"></script>
+    <script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
     <!--Just Zepto -->
     <!--<script type='text/javascript' src='http://g.alicdn.com/sj/lib/zepto/zepto.min.js'></script>-->
     <script>
@@ -315,6 +315,10 @@
                     }
                 }
             } else {
+                if (/\w*\s*token\s*\w*/.test(data.message)) {
+                    location.href = "login.html";
+                    return;
+                }
                 layer.msg(data.message);
                 $('#scanCharge').show();
             }
@@ -392,14 +396,15 @@
                         window.initLngLat(d);
                         if (d.length === 0) {
                             var div = document.createElement('div');
-                            div.text = '哈哈';
-                            div.style = "width:50px; heigth:50px;padding:10px;text-align:center;"
+                            div.innerText = '附近没充电桩';
+                            div.className = "mark"
                             var obj = {
+                                map: map, //创建时直接赋予map属性
                                 position: p,
-                                map: mapObj,
-                                offset: new AMap.Pixel(-10, -15),
                                 content: div,
+                                offset: new AMap.Pixel(-30, -70),
                             }
+                            console.log(obj);
                             new AMap.Marker(obj);
                         }
                         for (var i = 0, len = d.length; i < len; i++) {
