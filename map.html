@@ -223,25 +223,29 @@
 
         //设置列表点击事件
         function setSelectStan() {
+            var list;
+            var len = window.stationList.poiList ? window.stationList.poiList.length : 0;
+            if (len) {
+                list = window.stationList.poiList;
+            } else {
+                list = window.stationList.show;
+                len = window.stationList.show.length;
+            }
             $("#searchResult ul li").click(function(e) {
                 var li = $(e.target).parent('li') || $(e.target);
-                var list;
                 var stationSeq = li.find('.stationSeq').html();
-                var len = window.stationList.poiList ? window.stationList.poiList.length : 0;
-                if (len) {
-                    list = window.stationList.poiList;
-                } else {
-                    list = window.stationList.show;
-                    len = window.stationList.show.length;
-                }
                 for (var i = 0; i < len; i++) {
                     if (list[i].stationSeq == stationSeq) {
-                        console.log(list[i].strStationName);
                         var param = [list[i].longitude, list[i].latitude];
                         moveToStation(param);
                         break;
                     }
                 }
+                setTimeout(resetBox, 300);
+            });
+            $('#tipinput').keypress(function() {
+                var param = [list[0].longitude, list[0].latitude];
+                moveToStation(param);
                 setTimeout(resetBox, 300);
             });
         }
