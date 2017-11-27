@@ -148,6 +148,7 @@
             };
             $.ajaxByPost("/wechat/user/login", param, function(data) {
                 if (data.code == 200) { //成功
+                    localStorage.token = data.data.token;
                     window.location.href = "register-success.html";
                     console.log(data);
                 } else {
