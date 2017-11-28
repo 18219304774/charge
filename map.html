@@ -76,10 +76,13 @@
     $(function() {
         window.stationList = {};
         $("#tipinput").focus(function() {
-            $('#searchResult').slideToggle();
+            $('#searchResult').slideDown();
         })
         $("#tipinput").blur(function() {
-            $('#searchResult').slideToggle();
+            $('#searchResult').slideUp();
+            setTimeout(function() {
+                resetBox();
+            }, 300);
         })
 
         $('#clearSearchBtn').click(function() {
@@ -241,12 +244,14 @@
                         break;
                     }
                 }
-                setTimeout(resetBox, 300);
+                $('#tipinput').blur();
             });
-            $('#tipinput').keypress(function() {
-                var param = [list[0].longitude, list[0].latitude];
-                moveToStation(param);
-                setTimeout(resetBox, 300);
+            $('#tipinput').keypress(function(e) {
+                if (e.which == 13) {
+                    var param = [list[0].longitude, list[0].latitude];
+                    moveToStation(param);
+                    $('#tipinput').blur();
+                }
             });
         }
 
@@ -309,7 +314,7 @@
                         var orderSeq = d[0]["orderSeq"];
                         window.orderObj.orderSeq = orderSeq;
                         window.orderObj.orderStatus = orderStatus;
-                        if (orderStatus == 3 || orderStatus == 4) {
+                        if (orderStatus == 3 || orderStatus == 4 || orderStatus == 5) {
                             $('#unscanCharge').show();
                             $('#fixed_mark').show();
                         } else {
@@ -337,7 +342,7 @@
                 $('#fixed_mark .shcontrul').slideToggle();
             })
             $('#fixed_mark .font_mark p').click(function() {
-                if (orderStatus == 4) {
+                if (orderStatus == 4 || orderStatus == 5) {
                     location.href = "pay.html";
                 } else if (orderStatus == 3 || orderStatus == 2) {
                     location.href = "ready.html?orderstatus=" + orderStatus;
