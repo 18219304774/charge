@@ -1,0 +1,46 @@
+* {
+	padding: 0;
+	margin: 0;
+}
+
+html,
+body,
+#main {
+	width: 100%;
+	height: 100%;
+	background: #14191c;
+}
+
+#main {
+	background: url('../images/askfriend_bg.png') bottom center / contain no-repeat;
+}
+
+#main .top {
+	text-align: center;
+	padding: 20px;
+}
+
+#main .top img {
+	width: 90px;
+}
+
+.center_code {
+	width: 70%;
+	margin: 0px auto;
+}
+
+.center_code img {
+	width: 100%;
+}
+
+.hide_code {
+	display: block;
+	width: 300px;
+	height: 300px;
+	position: absolute;
+	top: 110px;
+	left: 50%;
+	margin-left: -150px;
+	z-index: 100;
+	opacity: 0;
+}

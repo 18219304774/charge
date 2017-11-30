@@ -1,0 +1,47 @@
+* {
+	padding: 0;
+	margin: 0;
+}
+
+body {
+	background: #020302;
+}
+
+#main {
+	background: url('../images/weal_bg.jpg') top center / contain no-repeat;
+}
+
+#main>img {
+	width: 100%;
+}
+
+.button {
+	text-align: center;
+}
+
+.button span {
+	padding: 4px 10px 4px 16px;
+	letter-spacing: 3px;
+	background: #fff;
+	border-radius: 4px;
+	color: #333;
+}
+
+.button a {
+	text-decoration: none;
+}
+
+.logo {
+	text-align: center;
+}
+
+.logo img {
+	width: 90px;
+}
+
+.foot {
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+}

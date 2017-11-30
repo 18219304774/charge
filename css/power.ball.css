@@ -10,6 +10,12 @@ body,
 	height: 100%;
 }
 
+#top img {
+	margin-top: 20px;
+	margin-left: 15px;
+	width: 90px;
+}
+
 #main {
 	background: #000 url('../images/power_bg.jpg') center center / cover no-repeat;
 }
@@ -17,4 +23,48 @@ body,
 .center_font {
 	width: 60%;
 	margin: 40px auto;
+}
+
+.center_font img {
+	margin-top: 10px;
+	width: 100%;
+}
+
+.left_font {
+	height: 180px;
+	float: right;
+	margin-top: 40px;
+}
+
+#code {
+	display: flex;
+	padding: 0 20px;
+	text-align: center;
+}
+
+#code>div {
+	flex: 1;
+	padding: 10px;
+}
+
+#code>div .code_title {
+	color: #fff;
+	padding: 0 0 10px;
+	font-size: 16px;
+}
+
+#code>div img {
+	width: 100%;
+}
+
+@media screen and (max-width:380px) {
+	.img_margin_top {
+		margin-top: 30px;
+	}
+}
+
+@media screen and (max-width:330px) {
+	.img_margin_top {
+		margin-top: 4px;
+	}
 }
