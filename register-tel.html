@@ -28,9 +28,9 @@
             <li>
                 <input type="password" id="confirmPwd" value="" placeholder="确认密码">
             </li>
-            <!-- <li>
+            <li>
                 <input type="text" id="invitedCode" placeholder="请输入推荐码（选填）">
-            </li> -->
+            </li>
         </ul>
         <a href="javascript:;" class="login-btn" id="register">一键注册</a>
     </section>
@@ -127,7 +127,7 @@
                         mobilePhone: $("#tel").valTrim(),
                         password: $("#userPwd").valTrim(),
                         verifyCode: $("#verifyCode").valTrim(),
-                        invitedCode: '' //$("#invitedCode").valTrim()
+                        invitedCode: $("#invitedCode").valTrim()
                     }, function(data) {
                         if (data.code == 200) { //成功
                             //window.location.href = "register-success.html";

@@ -11,36 +11,85 @@ body,
 	background: #14191c;
 }
 
+// #main {
+// 	background: url('../images/askfriend_bg.png') bottom center / contain no-repeat;
+// }
+// #main .top {
+// 	text-align: center;
+// 	padding: 20px;
+// }
+// #main .top img {
+// 	width: 90px;
+// }
+// .center_code {
+// 	width: 70%;
+// 	margin: 0px auto;
+// }
+// .center_code img {
+// 	width: 100%;
+// }
+// .hide_code {
+// 	display: block;
+// 	width: 300px;
+// 	height: 300px;
+// 	position: absolute;
+// 	top: 110px;
+// 	left: 50%;
+// 	margin-left: -150px;
+// 	z-index: 100;
+// 	opacity: 0;
+// }
 #main {
-	background: url('../images/askfriend_bg.png') bottom center / contain no-repeat;
+	background: url('../images/weal_bg.jpg') bottom center / contain no-repeat;
 }
 
 #main .top {
+	padding-top: 30%;
 	text-align: center;
-	padding: 20px;
 }
 
-#main .top img {
-	width: 90px;
+#main .top p {
+	font-size: 32px;
+	color: #fff;
 }
 
-.center_code {
-	width: 70%;
-	margin: 0px auto;
+#main .top p:nth-of-type(2) {
+	font-size: 26px;
+	font-weight: bold;
 }
 
-.center_code img {
-	width: 100%;
+#main .ask-code {
+	width: 80%;
+	color: #fff;
+	background: rgba(0, 0, 0, .7);
+	text-align: center;
+	margin: 100px auto 0;
+	padding: 6px;
 }
 
-.hide_code {
-	display: block;
-	width: 300px;
-	height: 300px;
-	position: absolute;
-	top: 110px;
-	left: 50%;
-	margin-left: -150px;
-	z-index: 100;
-	opacity: 0;
+#main .text {
+	text-align: center;
+	color: #fff;
+	margin-top: 100px;
+}
+
+#main .text p {
+	line-height: 30px;
+	letter-spacing: 0.7px;
+}
+
+#main .text p:nth-of-type(1) {
+	position: relative;
+	left: 4px;
+}
+
+#main .button {
+	width: 100px;
+	text-align: center;
+	border-radius: 2px;
+	line-height: 38px;
+	letter-spacing: 0.7px;
+	background: #ff6932;
+	color: #fff;
+	margin: 20px auto;
 }

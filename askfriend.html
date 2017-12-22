@@ -9,7 +9,7 @@
 </head>
 
 <body>
-	<div id="main">
+	<!-- <div id="main">
 		<div class="top">
 			<img src="images/power_logo.png" alt="">
 		</div>
@@ -17,7 +17,64 @@
 			<img src="images/code_friend.png" alt="">
 		</div>
 		<img src="images/code_friend_hidden.png" class="hide_code" alt="">
+	</div> -->
+	<div id="main">
+		<div class="top">
+			<p>邀好友</p>
+			<p>送能量球</p>
+		</div>
+		<div class="ask-code">
+			专属邀请码：
+			<span>123456</span>
+		</div>
+		<div class="text">
+			<p>奖励规则：</p>
+			<p>凡邀请好友成功注册驿电站</p>
+			<p>即可获得50能量球</p>
+			<p>邀请越多 奖励越多</p>
+		</div>
+		<div class="button">
+			<span>前往邀请</span>
+		</div>
 	</div>
 </body>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/ajax.js"></script>
+<script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script>
+var l = location;
+var lList = l.href.split('/');
+lList.pop();
+var shareUrl = lList.join('/') + '/register-tel.html?invitedCode=123456';
+console.log(shareUrl);
+var data = {
+	url: shareUrl
+}
+$.ajaxByGet('/wechat/auth/getAuthInfo', data, function(res) {
+	if (res.code == 200) {
+		console.log(res);
+		var data = res;
+		wx.config({
+			debug: false,
+			appId: data.appId,
+			timestamp: data.timestamp,
+			nonceStr: data.nonceStr,
+			signature: data.signature,
+			jsApiList: [
+				// 所有要调用的 API 都要加到这个列表中
+				'checkJsApi',
+				'onMenuShareTimeline', //分享到朋友圈
+				'onMenuShareAppMessage', //分享给好友
+				'hideMenuItems', //隐藏部分分享
+				'scanQRCode' //扫一扫
+			]
+		});
+	}
+})
+wx.ready(function() {
+	console.log('wx success');
+});
+</script>
 
 </html>
