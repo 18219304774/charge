@@ -70,7 +70,7 @@ body,
 #main .text {
 	text-align: center;
 	color: #fff;
-	margin-top: 100px;
+	margin-top: 60px;
 }
 
 #main .text p {
@@ -79,8 +79,10 @@ body,
 }
 
 #main .text p:nth-of-type(1) {
-	position: relative;
-	left: 4px;
+	span {
+		position: relative;
+		left: 4px;
+	}
 }
 
 #main .button {
@@ -92,4 +94,31 @@ body,
 	background: #ff6932;
 	color: #fff;
 	margin: 20px auto;
+}
+
+#mark {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: rgba(0, 0, 0, .9);
+}
+
+#mark .img {
+	height: 140px;
+}
+
+#mark .img img {
+	height: 140px;
+	float: right;
+	margin-right: 20px;
+}
+
+#mark .text {
+	margin-top: 10px;
+}
+
+#mark .text p:nth-of-type(1) {
+	font-size: 24px;
 }

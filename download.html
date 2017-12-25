@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<title>下载</title>
+	<link rel="stylesheet" href="css/zy-style.css">
+	<style>
+	html,
+	body {
+		height: 100%;
+		background: #f1f1f1;
+	}
+
+	#down_main .logo_div img {
+		width: 50%;
+		margin: 0 auto 40px;
+		padding-top: 40px;
+		display: block;
+	}
+
+	#down_main .flex_box {
+		display: flex;
+		padding: 20px;
+	}
+
+	#down_main .flex_box>div {
+		flex: 1;
+		margin: 0 5px;
+		padding: 5px 5px;
+		border-radius: 4px;
+		background: #6d6e72;
+	}
+
+	#down_main .flex_box>div img {
+		width: 40px;
+		float: left;
+	}
+
+	#down_main .flex_box>div p {
+		text-align: center;
+		color: #fff;
+	}
+
+	#down_main .flex_box>div p:nth-of-type(1) {
+		font-size: 12px;
+	}
+
+	#down_main .flex_box>div p:nth-of-type(2) {
+		font-size: 14px;
+	}
+
+	#down_main .page_end {
+		margin-top: 20px;
+		background: #fff;
+		text-align: center;
+	}
+
+	#down_main .page_end p {
+		color: #969696;
+		font-size: 14px;
+	}
+
+	#down_main .page_end p:nth-of-type(2) {
+		font-size: 20px;
+		margin-top: 10px;
+	}
+	</style>
+</head>
+
+<body>
+	<div id="down_main">
+		<div class="logo_div">
+			<img src="./images/logo.png" alt="">
+		</div>
+		<div class="flex_box">
+			<div id="dow_ios">
+				<img src="./images/down_ios.png">
+				<p>Available on</p>
+				<p>App Store</p>
+			</div>
+			<div id="dow_android">
+				<img src="./images/down_and.png">
+				<p>Available on</p>
+				<p>Android Market</p>
+			</div>
+		</div>
+		<div class="page_end">
+			<p>微信用户请点击右上角按钮在浏览器中打开</p>
+			<p>上海国际汽车城（集团）有限公司</p>
+		</div>
+	</div>
+</body>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script>
+$(function() {
+	var config = {
+		dowIosUrl: './images/logo.png',
+		dowAndroidUrl: './images/logo.png'
+	}
+	$('#dow_ios').click(function() {
+		location.href = config.dowIosUrl;
+	});
+	$('#dow_android').click(function() {
+		location.href = config.dowAndroidUrl;
+	});
+})
+</script>
+
+</html>

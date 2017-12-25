@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<title>账单</title>
+	<style>
+	* {
+		padding: 0;
+		margin: 0;
+	}
+
+	html,
+	body {
+		background: #eee;
+	}
+
+	#trad_list h1 {
+		font-size: 20px;
+		padding: 15px;
+	}
+
+	#trad_list .list ul li {
+		background: #fff;
+		padding: 10px 15px;
+	}
+
+	#trad_list .list ul li p {
+		padding: 10px 0;
+		color: #666;
+	}
+	</style>
+</head>
+
+<body>
+	<div id="trad_list">
+		<h1>剩余能量球 <span id="ballsum">545</span> 颗</h1>
+		<div class="list">
+			<ul>
+				<li>
+					<p>订单完成时间：2017-12-13 12:32:15</p>
+					<p>增加能量球 5 个</p>
+				</li>
+			</ul>
+		</div>
+	</div>
+</body>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/ajax.js"></script>
+<script>
+var param = {
+	token: localStorage.token
+}
+$(function() {
+	$.ajaxByGet('/wechat/user/user/moneyDetail', param, function(res) {
+		if (res.code == 200) {
+			var da = res.data;
+			$('#ballsum').text(da[0].walletAmt);
+			var domc = '';
+			var type = '';
+			for (var i = 0; i < da.length; i++) {
+				switch (da[i].handleType) {
+					case 0:
+						type = '支付订单';
+						break;
+					case 1:
+						type = 'app充值';
+						break;
+					case 2:
+						type = '退款';
+						break;
+					case 3:
+						type = '内部充值';
+						break;
+					case 4:
+						type = '邀请好友奖励';
+						break;
+					case 5:
+						type = '注册奖励';
+						break;
+
+				}
+				domc += '<li>'
+				domc += '<p>订单完成时间：' + $.getTimeDetail(da[i].createdTime, 2) + '</p>'
+				domc += '<p>' + type + da[i].handleAmt + '颗能量球' + '</p>'
+			}
+			$('.list ul').html(domc);
+		}
+	});
+})
+</script>
+
+</html>

@@ -47,6 +47,15 @@
         init: function() {
             registerObj.verify();
             registerObj.register();
+            registerObj.setInvitedCode();
+        },
+        setInvitedCode: function() {
+            var l = location;
+            var invitedCode = '';
+            if (l.search) {
+                invitedCode = l.search.replace('?', '').split('=')[1];
+            }
+            $("#invitedCode").val(invitedCode);
         },
         verify: function() {
             $(".verify-code").on("click", function() {

@@ -28,13 +28,22 @@
 			<span>123456</span>
 		</div>
 		<div class="text">
-			<p>奖励规则：</p>
+			<p><span>奖励规则：</span></p>
 			<p>凡邀请好友成功注册驿电站</p>
 			<p>即可获得50能量球</p>
 			<p>邀请越多 奖励越多</p>
 		</div>
 		<div class="button">
 			<span>前往邀请</span>
+		</div>
+		<div id="mark" style="display: none;">
+			<div class="img">
+				<img src="./images/sd.png" alt="">
+			</div>
+			<div class="text">
+				<p>点击右上角</p>
+				<p>邀请好队友组队充电</p>
+			</div>
 		</div>
 	</div>
 </body>
@@ -43,18 +52,33 @@
 <script src="js/ajax.js"></script>
 <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
 <script>
+var invitedCode = '1d52xz65'
 var l = location;
 var lList = l.href.split('/');
 lList.pop();
-var shareUrl = lList.join('/') + '/register-tel.html?invitedCode=123456';
+var shareImgUrl = lList.join('/') + '/share.png';
+var shareUrl = '';
 console.log(shareUrl);
+$.ajaxByGet('/wechat/user/user/info', { token: localStorage.token }, function(res) {
+	if (res.code == 200) {
+		invitedCode = res.data.inviteCode;
+		$('.ask-code').find('span').text(invitedCode);
+		shareUrl = lList.join('/') + '/register-tel.html?invitedCode=' + invitedCode;
+	}
+})
 var data = {
 	url: shareUrl
 }
+$('.button').click(function() {
+	$('#mark').show();
+});
+$('#mark').click(function() {
+	$('#mark').hide();
+});
 $.ajaxByGet('/wechat/auth/getAuthInfo', data, function(res) {
 	if (res.code == 200) {
 		console.log(res);
-		var data = res;
+		var data = res.data;
 		wx.config({
 			debug: false,
 			appId: data.appId,
@@ -73,8 +97,24 @@ $.ajaxByGet('/wechat/auth/getAuthInfo', data, function(res) {
 	}
 })
 wx.ready(function() {
-	console.log('wx success');
+	console.log('wx.ready');
+	var shareObj = {
+		title: '新能源汽车免费充电了',
+		desc: '您的好友邀您一起充电，邀请码：' + invitedCode,
+		link: shareUrl,
+		imgUrl: shareImgUrl,
+		complete: function() {
+			$('#mark').hide();
+		},
+	}
+	share(shareObj);
 });
+
+function share(obj) {
+	console.log(obj);
+	wx.onMenuShareTimeline(obj);
+	wx.onMenuShareAppMessage(obj);
+}
 </script>
 
 </html>
