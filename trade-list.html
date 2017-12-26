@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
-	<title>账单</title>
+	<title>能量球明细</title>
 	<style>
 	* {
 		padding: 0;
@@ -83,7 +83,8 @@ $(function() {
 
 				}
 				domc += '<li>'
-				domc += '<p>订单完成时间：' + $.getTimeDetail(da[i].createdTime, 2) + '</p>'
+				domc += '<p>发生时间：' + $.getTimeStr(da[i].createdTime) + '</p>'
+				console.log(da[i].createdTime);
 				domc += '<p>' + type + da[i].handleAmt + '颗能量球' + '</p>'
 			}
 			$('.list ul').html(domc);

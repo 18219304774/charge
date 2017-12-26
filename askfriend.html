@@ -56,46 +56,47 @@ var invitedCode = '1d52xz65'
 var l = location;
 var lList = l.href.split('/');
 lList.pop();
-var shareImgUrl = lList.join('/') + '/share.png';
+var shareImgUrl = lList.join('/') + '/images/share.png';
 var shareUrl = '';
-console.log(shareUrl);
 $.ajaxByGet('/wechat/user/user/info', { token: localStorage.token }, function(res) {
 	if (res.code == 200) {
 		invitedCode = res.data.inviteCode;
 		$('.ask-code').find('span').text(invitedCode);
 		shareUrl = lList.join('/') + '/register-tel.html?invitedCode=' + invitedCode;
+		console.log(shareUrl);
+		var data = {
+			url: window.location.href
+		};
+		$.ajaxByGet('/wechat/auth/getAuthInfo', data, function(res) {
+			if (res.code == 200) {
+				var data = res.data;
+				console.log(data);
+				wx.config({
+					debug: true,
+					appId: data.appId,
+					timestamp: data.timestamp,
+					nonceStr: data.nonceStr,
+					signature: data.signature,
+					jsApiList: [
+						// 所有要调用的 API 都要加到这个列表中
+						'checkJsApi',
+						'onMenuShareTimeline', //分享到朋友圈
+						'onMenuShareAppMessage', //分享给好友
+						'hideMenuItems', //隐藏部分分享
+						'scanQRCode' //扫一扫
+					]
+				});
+			}
+		})
 	}
 })
-var data = {
-	url: shareUrl
-}
+
 $('.button').click(function() {
 	$('#mark').show();
 });
 $('#mark').click(function() {
 	$('#mark').hide();
 });
-$.ajaxByGet('/wechat/auth/getAuthInfo', data, function(res) {
-	if (res.code == 200) {
-		console.log(res);
-		var data = res.data;
-		wx.config({
-			debug: false,
-			appId: data.appId,
-			timestamp: data.timestamp,
-			nonceStr: data.nonceStr,
-			signature: data.signature,
-			jsApiList: [
-				// 所有要调用的 API 都要加到这个列表中
-				'checkJsApi',
-				'onMenuShareTimeline', //分享到朋友圈
-				'onMenuShareAppMessage', //分享给好友
-				'hideMenuItems', //隐藏部分分享
-				'scanQRCode' //扫一扫
-			]
-		});
-	}
-})
 wx.ready(function() {
 	console.log('wx.ready');
 	var shareObj = {

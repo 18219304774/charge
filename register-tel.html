@@ -53,7 +53,7 @@
             var l = location;
             var invitedCode = '';
             if (l.search) {
-                invitedCode = l.search.replace('?', '').split('=')[1];
+                invitedCode = $.getUrlArgs().invitedCode;
             }
             $("#invitedCode").val(invitedCode);
         },
