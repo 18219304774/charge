@@ -6,12 +6,24 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
     <title>手机注册</title>
     <link rel="stylesheet" href="css/zy-style.css">
+    <style>
+    .register-head {
+        height: auto;
+    }
+
+    .register-head img {
+        width: 100%;
+        float: none;
+        margin: 0;
+    }
+    </style>
 </head>
 
 <body class="">
     <header class="register-head">
-        <img src="images/iphone.png" alt="">
-        <label>手机用户注册</label>
+        <img src="./images/banner_r.jpg" id="benner" alt="">
+        <!--  <img src="images/iphone.png" alt="">
+        <label>手机用户注册</label> -->
     </header>
     <section class="build-list mg-t-5">
         <ul id="registerForm">
@@ -55,7 +67,10 @@
             if (l.search) {
                 invitedCode = $.getUrlArgs().invitedCode;
             }
-            $("#invitedCode").val(invitedCode);
+            if (invitedCode) {
+                $("#invitedCode").val('邀请码：' + invitedCode);
+                $('#benner').attr('src', './images/banner_ask.jpg');
+            }
         },
         verify: function() {
             $(".verify-code").on("click", function() {
@@ -136,7 +151,7 @@
                         mobilePhone: $("#tel").valTrim(),
                         password: $("#userPwd").valTrim(),
                         verifyCode: $("#verifyCode").valTrim(),
-                        invitedCode: $("#invitedCode").valTrim()
+                        invitedCode: $("#invitedCode").valTrim().replace(/(邀|请|码|：)/g, '')
                     }, function(data) {
                         if (data.code == 200) { //成功
                             //window.location.href = "register-success.html";

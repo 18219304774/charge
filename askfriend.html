@@ -72,7 +72,7 @@ $.ajaxByGet('/wechat/user/user/info', { token: localStorage.token }, function(re
 				var data = res.data;
 				console.log(data);
 				wx.config({
-					debug: true,
+					debug: false,
 					appId: data.appId,
 					timestamp: data.timestamp,
 					nonceStr: data.nonceStr,
@@ -99,8 +99,8 @@ $('#mark').click(function() {
 });
 wx.ready(function() {
 	console.log('wx.ready');
-	var shareObj = {
-		title: '新能源汽车免费充电了',
+	var shareObjFriend = {
+		title: '新能源汽车能免费充电啦!',
 		desc: '您的好友邀您一起充电，邀请码：' + invitedCode,
 		link: shareUrl,
 		imgUrl: shareImgUrl,
@@ -108,14 +108,17 @@ wx.ready(function() {
 			$('#mark').hide();
 		},
 	}
-	share(shareObj);
+	var shareObjTimeline = {
+		title: '新能源汽车能免费充电啦!邀您一起充电，邀请码：' + invitedCode,
+		link: shareUrl,
+		imgUrl: shareImgUrl,
+		complete: function() {
+			$('#mark').hide();
+		},
+	}
+	wx.onMenuShareTimeline(shareObjTimeline);
+	wx.onMenuShareAppMessage(shareObjFriend);
 });
-
-function share(obj) {
-	console.log(obj);
-	wx.onMenuShareTimeline(obj);
-	wx.onMenuShareAppMessage(obj);
-}
 </script>
 
 </html>
