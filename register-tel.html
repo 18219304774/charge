@@ -69,7 +69,9 @@
             }
             if (invitedCode) {
                 $("#invitedCode").val('邀请码：' + invitedCode);
-                $('#benner').attr('src', './images/banner_ask.jpg');
+                if (invitedCode == '1161043') {
+                    $('#benner').attr('src', './images/banner_ask.jpg');
+                }
             }
         },
         verify: function() {
