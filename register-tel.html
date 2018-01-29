@@ -189,29 +189,16 @@
 </script>
 <script>
 (function() {
-    var invitedCode = ''
+    var invitedCode = $.getUrlArgs().invitedCode;
     var l = location;
     var lList = l.href.split('/');
     lList.pop();
     var shareImgUrl = lList.join('/') + '/images/share.png';
-    var shareUrl = '';
-    if (localStorage.token) {
-        $.ajaxByGet('/wechat/user/user/info', { token: localStorage.token }, function(res) {
-            if (res.code == 200) {
-                invitedCode = res.data.inviteCode;
-                wxconfig()
-            }
-        })
-    } else {
-        wxconfig();
-    }
+    var shareUrl = l.href;
+
+    wxconfig();
 
     function wxconfig() {
-        if (invitedCode) {
-            shareUrl = lList.join('/') + '/register-tel.html?invitedCode=' + invitedCode;
-        } else {
-            shareUrl = l.href
-        }
         var data = {
             url: l.href
         };
@@ -249,7 +236,7 @@
             link: shareUrl,
             imgUrl: shareImgUrl,
             complete: function() {
-                $('#mark').hide();
+                //$('#mark').hide();
             },
         }
         var shareObjTimeline = {
@@ -257,7 +244,7 @@
             link: shareUrl,
             imgUrl: shareImgUrl,
             complete: function() {
-                $('#mark').hide();
+                //$('#mark').hide();
             },
         }
         wx.onMenuShareTimeline(shareObjTimeline);
